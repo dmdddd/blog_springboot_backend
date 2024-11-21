@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,8 @@ import java.util.Optional;
 
 import com.example.demo.model.Article;
 import com.example.demo.service.ArticleService;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 @RestController
 @RequestMapping("/api/articles")
@@ -43,6 +46,26 @@ public class ArticleController {
     public ResponseEntity<Article> createArticle(@RequestBody Article article) {
         Article savedArticle = articleService.saveArticle(article);
         return ResponseEntity.ok(savedArticle);
+    }
+
+    @PutMapping("/{article_name}/upvote")
+    public ResponseEntity<Article> upvoteArticle(@PathVariable("article_name") String articleName) {
+        Optional<Article> updatedArticle = articleService.upvoteArticle(articleName);
+        if (updatedArticle.isPresent()) {
+            return ResponseEntity.ok(updatedArticle.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PutMapping("/{article_name}/downvote")
+    public ResponseEntity<Article> downvoteArticle(@PathVariable("article_name") String articleName) {
+        Optional<Article> updatedArticle = articleService.downvoteArticle(articleName);
+        if (updatedArticle.isPresent()) {
+            return ResponseEntity.ok(updatedArticle.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
 }

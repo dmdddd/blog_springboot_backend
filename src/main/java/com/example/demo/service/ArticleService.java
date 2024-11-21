@@ -36,4 +36,28 @@ public class ArticleService {
             throw new IllegalArgumentException("Article name cannot be null or empty");
         }
     }
+
+    public Optional<Article> upvoteArticle(String articleName) {
+        Optional<Article> articleOpt = articleRepository.findByName(articleName);
+        if (!articleOpt.isPresent()) {
+            return Optional.empty(); // Article not found
+        }
+
+        Article article = articleOpt.get();
+        article.setUpvotes(article.getUpvotes() + 1);   // Increment upvotes
+        articleRepository.save(article);                // Save updated article
+        return Optional.of(article);
+    }
+
+    public Optional<Article> downvoteArticle(String articleName) {
+        Optional<Article> articleOpt = articleRepository.findByName(articleName);
+        if (!articleOpt.isPresent()) {
+            return Optional.empty(); // Article not found
+        }
+        
+        Article article = articleOpt.get();
+        article.setUpvotes(article.getUpvotes() - 1);   // Increment upvotes
+        articleRepository.save(article);                // Save updated article
+        return Optional.of(article);
+    }
 }
