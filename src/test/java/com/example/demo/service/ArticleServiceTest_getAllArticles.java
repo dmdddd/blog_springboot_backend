@@ -40,7 +40,7 @@ public class ArticleServiceTest_getAllArticles {
                 "1",
                 "Article 1",
                 "Getting Started with Spring Boot",
-                "This is a detailed article about Spring Boot basics.",
+                Arrays.asList("This is a detailed article about Spring Boot basics."),
                 25,
                 Arrays.asList("user1", "user2")
         );
@@ -48,7 +48,7 @@ public class ArticleServiceTest_getAllArticles {
                 "2",
                 "Article 2",
                 "Getting Started with Spring Boot",
-                "This is a detailed article about Spring Boot basics.",
+                Arrays.asList("This is a detailed article about Spring Boot basics."),
                 25,
                 Arrays.asList("user1", "user3")
         );
@@ -92,7 +92,7 @@ public class ArticleServiceTest_getAllArticles {
         "2, article 2, Article Two, Content 2, 56, 'd,1'",
         "3, article 3, Article Three, Content 3, 669, '1,3'"
     })
-    void getAllArticles_shouldReturnCorrectArticle(String id, String name, String title, String content, int upvotes, String upvoteIds) {
+    void getAllArticles_shouldReturnCorrectArticle(String id, String name, String title, List<String> content, int upvotes, String upvoteIds) {
         // Arrange
         Article article = new Article(id, name, title, content, upvotes, List.of(upvoteIds.split(",")));
         List<Article> mockArticles = Arrays.asList(article);
@@ -142,8 +142,8 @@ public class ArticleServiceTest_getAllArticles {
     @Test
     void getAllArticles_shouldReturnArticlesInCorrectOrder() {
         // Arrange: Create mock articles
-        Article article1 = new Article("1", "First Article", "Title 1", "Content 1", 5, Collections.emptyList());
-        Article article2 = new Article("2", "Second Article", "Title 2", "Content 2", 10, Collections.emptyList());
+        Article article1 = new Article("1", "First Article", "Title 1", Arrays.asList("Content 1"), 5, Collections.emptyList());
+        Article article2 = new Article("2", "Second Article", "Title 2", Arrays.asList("Content 2"), 10, Collections.emptyList());
 
         when(articleRepository.findAll()).thenReturn(Arrays.asList(article1, article2));
 
@@ -160,7 +160,7 @@ public class ArticleServiceTest_getAllArticles {
         // Arrange: Create a large number of mock articles
         List<Article> largeDataSet = new ArrayList<>();
         for (int i = 1; i <= 1000; i++) {
-            largeDataSet.add(new Article(String.valueOf(i), "Article " + i, "Title " + i, "Content " + i, i, Collections.emptyList()));
+            largeDataSet.add(new Article(String.valueOf(i), "Article " + i, "Title " + i, Arrays.asList("Content " + i), i, Collections.emptyList()));
         }
 
         when(articleRepository.findAll()).thenReturn(largeDataSet);
@@ -193,7 +193,7 @@ public class ArticleServiceTest_getAllArticles {
     @Test
     void getAllArticles_shouldHandleSpecialCharactersInArticles() {
         // Arrange: Create mock articles with special characters
-        Article article = new Article("1", "Art!cle @#$", "Titl€%", "Cøntênt*", 10, Collections.emptyList());
+        Article article = new Article("1", "Art!cle @#$", "Titl€%", Arrays.asList("Cøntênt*"), 10, Collections.emptyList());
 
         when(articleRepository.findAll()).thenReturn(Collections.singletonList(article));
 

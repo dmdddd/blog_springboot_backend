@@ -20,7 +20,7 @@ public class Article {
     @Field("title")
     private String title;
     @Field("content")
-    private String content;
+    private List<String> content;
     @Field("upvotes")
     private int upvotes;
     @Field("upvoteIds")
