@@ -26,11 +26,6 @@ public class FirebaseTokenFilter extends org.springframework.web.filter.OncePerR
             try {
                 FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
 
-                // // Log user information for debugging
-                System.out.println("Authenticated User ID: " + decodedToken.getUid());
-                System.out.println("Authenticated User Email: " + decodedToken.getEmail());
-                System.out.println("Authenticated User Name: " + decodedToken.getName());
-
                 // Create an authentication object for Spring Security
                 PreAuthenticatedAuthenticationToken authentication =
                         new PreAuthenticatedAuthenticationToken(
