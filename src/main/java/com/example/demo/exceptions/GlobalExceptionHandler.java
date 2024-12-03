@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 // Maps these exceptions to meaningful HTTP responses with appropriate status codes (e.g., 404 Not Found, 400 Bad Request).
+// Authentication exception is being thrown by the Firebase module
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
