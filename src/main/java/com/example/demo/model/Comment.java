@@ -23,6 +23,8 @@ public class Comment {
     private String articleName;
     @Field("userEmail")
     private String userEmail;
+    @Field("userIcon")
+    private String userIcon;
     @Field("createdOn")
     private Date createdOn;
 }
