@@ -20,6 +20,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth
                             .requestMatchers("/api/articles/*/downvote").authenticated()    // Require authentication
+                            .requestMatchers("/api/articles/*/upvote").authenticated()      // Require authentication
                             .requestMatchers("/api/articles/*").permitAll()                 // Open access
                             .anyRequest().permitAll())                                                  // Other endpoints open
                     .addFilterBefore(firebaseTokenFilter, UsernamePasswordAuthenticationFilter.class);
