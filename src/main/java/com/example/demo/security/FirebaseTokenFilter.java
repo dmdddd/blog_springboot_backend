@@ -3,6 +3,8 @@ package com.example.demo.security;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
@@ -25,20 +27,28 @@ public class FirebaseTokenFilter extends org.springframework.web.filter.OncePerR
             String token = request.getHeader("authtoken");
             try {
                 FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
+                
+                // Extract user details from the Firebase token
+                String uid = decodedToken.getUid();
+                String email = decodedToken.getEmail();
+                String name = decodedToken.getName();
+                String photoUrl = (String) decodedToken.getClaims().get("picture");
 
-                // Create an authentication object for Spring Security
-                PreAuthenticatedAuthenticationToken authentication =
-                        new PreAuthenticatedAuthenticationToken(
-                                decodedToken.getUid(), // Use UID as principal
-                                null, // No credentials required
-                                null  // Authorities, if needed
+                // Create an authentication object with user details
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                uid,  // UID as principal
+                                null, // No credentials
+                                null  // Authorities (e.g., roles), if needed
                         );
+
+                // Optionally, include additional details in the authentication object
+                authentication.setDetails(new FirebaseUserDetails(email, name, photoUrl));
 
                 // Store the authentication in the SecurityContext
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
             } catch (FirebaseAuthException e) {
-                System.out.println("Token: " + token);
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Token");
                 return;
             }
