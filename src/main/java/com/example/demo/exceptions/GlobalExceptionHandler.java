@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
     
     @ExceptionHandler(ArticleNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleArticleNotFoundException(ArticleNotFoundException ex) {
