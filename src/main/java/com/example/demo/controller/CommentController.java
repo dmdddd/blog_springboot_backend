@@ -2,6 +2,8 @@ package com.example.demo.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,26 +11,41 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.model.Article;
-import com.example.demo.model.Comment;
+import com.example.demo.dto.CommentRequestDto;
+import com.example.demo.dto.CommentResponseDto;
+import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.service.CommentService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @RestController
 @RequestMapping("/api/comments/")
 public class CommentController {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @Autowired
     private CommentService commentService;
     
 
     // GET endpoint to retrieve all comments on an article
     @GetMapping("/{article_name}")
-    public ResponseEntity<List<Comment>> getAllCommentsOfArticle(@PathVariable("article_name") String articleName) {
-        List<Comment> comments = commentService.getAllCommentsOfArticle(articleName);
+    public ResponseEntity<List<CommentResponseDto>> getAllCommentsOfArticle(@PathVariable("article_name") String articleName) {
 
-        if (comments.isEmpty()) {
-            return ResponseEntity.noContent().build(); // No content (204) if empty
-        }
-        return ResponseEntity.ok(comments); // 200 OK with the articles
+        List<CommentResponseDto> comments = commentService.getAllCommentsOfArticle(articleName);
+        return ResponseEntity.ok(comments); // 200 OK with the comments
     }
 
+    @PostMapping("/add/{article_name}")
+    public ResponseEntity<List<CommentResponseDto>> addCommentToArticle(
+                                        @PathVariable("article_name") String articleName,
+                                        @RequestBody CommentRequestDto commentRequest) {
+
+
+        logger.info("Received request to add a comment to article {}", articleName);
+        List<CommentResponseDto> responseDTO = commentService.addComment(commentRequest, articleName);
+        logger.info("Successfully added comment to article {}", articleName);
+        return ResponseEntity.ok(responseDTO); // Return the response DTO back to the client
+    }
 }

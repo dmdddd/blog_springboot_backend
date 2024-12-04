@@ -27,4 +27,15 @@ public class Comment {
     private String userIcon;
     @Field("createdOn")
     private Date createdOn;
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "id='" + id + '\'' +
+                ", article='" + articleName + '\'' +
+                ", text='" + text + '\'' +
+                ", userEmail='" + userEmail + '\'' +
+                ", createdOn=" + createdOn +
+                '}';
+    }
 }
