@@ -28,6 +28,8 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testImplementation("org.mockito:mockito-core:5.5.0")
+    implementation("com.google.firebase:firebase-admin:9.1.1") // Firebase Admin SDK for Authentication
+    implementation("org.springframework.boot:spring-boot-starter-security") // Spring Boot Security
 }
 
 tasks.withType<Test> {
