@@ -1,5 +1,5 @@
 - [ ] fix the getAllArticles_shouldReturnCorrectArticle test
-- [ ] When adding a comment, check that the article exists, before doing so
+- [x] When adding a comment, check that the article exists, before doing so
 - [ ] Add logging to existing services
 - [x] Add endpoint for deleting a comment
 - [ ] Add endpoint for editing a comment - put /api/comments/edit/:id
