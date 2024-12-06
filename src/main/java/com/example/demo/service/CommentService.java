@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 import com.example.demo.converters.CommentConverter;
 import com.example.demo.dto.CommentRequestDto;
 import com.example.demo.dto.CommentResponseDto;
+import com.example.demo.exceptions.ArticleNotFoundException;
 import com.example.demo.exceptions.CommentNotFoundException;
 import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.model.Comment;
+import com.example.demo.repository.ArticleRepository;
 import com.example.demo.repository.CommentRepository;
 
 @Service
@@ -23,12 +25,14 @@ public class CommentService {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private final CommentRepository commentRepository;
+    private final ArticleRepository articleRepository;
     private final CommentConverter commentConverter;
     private final AuthenticationService authenticationService;
 
     // Constructor injection
-    public CommentService(CommentRepository commentRepository, CommentConverter commentConverter, AuthenticationService authenticationService) {
+    public CommentService(CommentRepository commentRepository, ArticleRepository articleRepository, CommentConverter commentConverter, AuthenticationService authenticationService) {
         this.commentRepository = commentRepository;
+        this.articleRepository = articleRepository;
         this.commentConverter = commentConverter;
         this.authenticationService = authenticationService;
     }
@@ -48,16 +52,11 @@ public class CommentService {
 
     public List<CommentResponseDto> addComment(CommentRequestDto commentRequest, String article) {
 
-        // TODO: check if article exists
-        logger.debug("Checking if article with ID {} exists", article);
-        //////////
-        /// // Check if article exists
-        // Article article = articleService.getArticleById(articleId);
-        // if (article == null) {
-        //     logger.warn("Article with ID {} not found", articleId);
-        //     throw new ResourceNotFoundException("Article not found");
-        // }
-
+        // Check if the article exists
+        logger.debug("Checking if article with name {} exists", article);
+        if (!articleRepository.existsByName(article)) {
+            throw new ArticleNotFoundException("Article with name " + article + " not found");
+        }
 
         Comment newComment = new Comment(
             null, // ID will be auto-generated
