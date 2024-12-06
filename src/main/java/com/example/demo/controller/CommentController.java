@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,10 +43,18 @@ public class CommentController {
                                         @PathVariable("article_name") String articleName,
                                         @RequestBody CommentRequestDto commentRequest) {
 
-
         logger.info("Received request to add a comment to article {}", articleName);
         List<CommentResponseDto> responseDTO = commentService.addComment(commentRequest, articleName);
         logger.info("Successfully added comment to article {}", articleName);
         return ResponseEntity.ok(responseDTO); // Return the response DTO back to the client
+    }
+
+    @DeleteMapping("/delete/{comment_id}")
+    public ResponseEntity<String> deleteCommentById(@PathVariable("comment_id") String commentId) {
+
+        logger.info("Received request to delete comment id {}", commentId);
+        commentService.deleteCommentById(commentId);
+        logger.info("Successfully deleted comment id {}", commentId);
+        return ResponseEntity.ok("Comment deleted successfully");
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.converters.CommentConverter;
 import com.example.demo.dto.CommentRequestDto;
 import com.example.demo.dto.CommentResponseDto;
+import com.example.demo.exceptions.CommentNotFoundException;
 import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.model.Comment;
 import com.example.demo.repository.CommentRepository;
@@ -74,5 +75,15 @@ public class CommentService {
         logger.info("Successfully saved comment with ID {} for article {}", newComment.getId(), article);
         List<CommentResponseDto> comments = getAllCommentsOfArticle(article);
         return comments;
+    }
+
+    public void deleteCommentById(String id) {
+
+        if (!commentRepository.existsById(id)) {
+            throw new CommentNotFoundException("Comment with ID " + id + " not found");
+        }
+        commentRepository.deleteById(id);
+        logger.info("Successfully deleted comment with ID {}", id);
+
     }
 }
