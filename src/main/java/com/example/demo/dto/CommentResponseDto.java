@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor // Generates a constructor with all fields
 public class CommentResponseDto {
-    private final String id;
+    private final String _id;
     private final String postedBy;
     private final String text;
     private final String articleName;
