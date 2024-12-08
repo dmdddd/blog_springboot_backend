@@ -3,6 +3,7 @@ package com.example.demo.service;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -83,6 +84,18 @@ public class CommentService {
         }
         commentRepository.deleteById(id);
         logger.info("Successfully deleted comment with ID {}", id);
+    }
 
+    public CommentResponseDto updateCommentText(String id, String text) {
+        Optional<Comment> existingComment = commentRepository.findById(id);
+        if (existingComment.isEmpty()) {
+            throw new CommentNotFoundException("Comment with ID " + id + " not found");
+        }
+
+        Comment comment = existingComment.get();
+        comment.setText(text);
+        commentRepository.save(comment);
+
+        return commentConverter.toDto(comment, authenticationService.getCurrentUserEmail());
     }
 }

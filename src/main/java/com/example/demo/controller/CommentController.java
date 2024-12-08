@@ -17,6 +17,7 @@ import com.example.demo.dto.CommentResponseDto;
 import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.service.CommentService;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -56,5 +57,15 @@ public class CommentController {
         commentService.deleteCommentById(commentId);
         logger.info("Successfully deleted comment id {}", commentId);
         return ResponseEntity.ok("Comment deleted successfully");
+    }
+
+    @PutMapping("/edit/{comment_id}")
+    public ResponseEntity<CommentResponseDto> editComment(
+                                        @PathVariable("comment_id") String id,
+                                        @RequestBody CommentRequestDto updatedComment){
+        logger.info("Received reqest to update comment id {}", id);
+        CommentResponseDto responseDTO = commentService.updateCommentText(id, updatedComment.getText());
+        logger.info("Successfully updated comment id {}", id);
+        return ResponseEntity.ok(responseDTO); // Return the response DTO back to the client
     }
 }
