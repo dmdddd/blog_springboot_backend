@@ -2,5 +2,5 @@
 - [x] When adding a comment, check that the article exists, before doing so
 - [ ] Add logging to existing services
 - [x] Add endpoint for deleting a comment
-- [ ] Add endpoint for editing a comment - put /api/comments/edit/:id
+- [x] Add endpoint for editing a comment - put /api/comments/edit/:id
 - [ ] Update icon - post /api/comments/updateIcon
