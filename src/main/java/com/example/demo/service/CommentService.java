@@ -39,6 +39,7 @@ public class CommentService {
     }
 
     public List<CommentResponseDto> getAllCommentsOfArticle(String articleName) {
+
         List<Comment> comments = commentRepository.findByArticleName(articleName);
         // Return an empty list if no comments are found
         if (comments.isEmpty()) {
@@ -60,6 +61,7 @@ public class CommentService {
         }
 
         Comment newComment = new Comment(
+
             null, // ID will be auto-generated
             authenticationService.getCurrentUserName(),   // name of the user, for example "Dan"
             commentRequest.getText(),
@@ -87,6 +89,7 @@ public class CommentService {
     }
 
     public CommentResponseDto updateCommentText(String id, String text) {
+
         Optional<Comment> existingComment = commentRepository.findById(id);
         if (existingComment.isEmpty()) {
             throw new CommentNotFoundException("Comment with ID " + id + " not found");
@@ -97,5 +100,12 @@ public class CommentService {
         commentRepository.save(comment);
 
         return commentConverter.toDto(comment, authenticationService.getCurrentUserEmail());
+    }
+
+
+    public void updatePhotoUrlForUser(String photoUrl) {
+        String email = authenticationService.getCurrentUserEmail();
+        logger.debug("Updating photoUrl for comments by {} to {}", photoUrl, email);
+        commentRepository.updatePhotoUrlForEmail(email, photoUrl);
     }
 }

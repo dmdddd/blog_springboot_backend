@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.CommentRequestDto;
 import com.example.demo.dto.CommentResponseDto;
+import com.example.demo.dto.PhotoUrlUpdateRequestDto;
 import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.service.CommentService;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -67,5 +68,14 @@ public class CommentController {
         CommentResponseDto responseDTO = commentService.updateCommentText(id, updatedComment.getText());
         logger.info("Successfully updated comment id {}", id);
         return ResponseEntity.ok(responseDTO); // Return the response DTO back to the client
+    }
+
+    @PostMapping("/updateIcon")
+    public ResponseEntity<String> updatePhotoUrl(@RequestBody PhotoUrlUpdateRequestDto requestDto) {
+
+        logger.info("Received reqest to update icon for comments of user");
+        commentService.updatePhotoUrlForUser(requestDto.getPhotoURL());
+        logger.info("Successfully updated icon for comments of user");
+        return ResponseEntity.ok("Comments updated successfully");
     }
 }
