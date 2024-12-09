@@ -3,4 +3,12 @@
 - [ ] Add logging to existing services
 - [x] Add endpoint for deleting a comment
 - [x] Add endpoint for editing a comment - put /api/comments/edit/:id
-- [ ] Update icon - post /api/comments/updateIcon
+- [x] Update icon - post /api/comments/updateIcon
+- [ ] FE: arror when logging out and I'm in the edit user information window, need to reroute to main page(?)
+- [ ] Change endpoints to follow best REST practices:
+    - [ ] POST /api/articles/{article_id}/vote?type=up
+    - [ ] POST /api/articles/{article_id}/vote?type=down
+    - [ ] GET /api/articles/{article_id}/comments
+    - [ ] POST /api/articles/{article_id}/comments
+    - [ ] DELETE /api/comments/{comment_id}
+    - [ ] PUT  /api/comments/{comment_id}
