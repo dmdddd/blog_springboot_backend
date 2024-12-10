@@ -19,8 +19,12 @@ import java.util.Map;
 
 import com.example.demo.dto.ArticleRequestDto;
 import com.example.demo.dto.ArticleResponseDto;
+import com.example.demo.dto.CommentRequestDto;
+import com.example.demo.dto.CommentResponseDto;
 import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.service.ArticleService;
+import com.example.demo.service.CommentService;
+
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -28,11 +32,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api/articles")
 public class ArticleController {
-
+    
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @Autowired
     private ArticleService articleService;
+    @Autowired
+    private CommentService commentService;
 
     // GET endpoint to retrieve all articles
     @GetMapping
@@ -78,5 +84,31 @@ public class ArticleController {
             .toUri();
 
         return ResponseEntity.created(location).body(newArticle);
+    }
+
+    @GetMapping("/{article_name}/comments")
+    public ResponseEntity<List<CommentResponseDto>> getAllCommentsOfArticle(@PathVariable("article_name") String articleName) {
+        logger.info("Received request to get all comments for article: {}", articleName);
+
+        List<CommentResponseDto> comments = commentService.getAllCommentsOfArticle(articleName);
+        logger.info("Found {} comments for article: {}", comments.size(), articleName);
+        return ResponseEntity.ok(comments); // 200 OK with the comments
+    }
+
+    @PostMapping("/{article_name}/comments")
+    public ResponseEntity<CommentResponseDto> addCommentToArticle(
+                                        @PathVariable("article_name") String articleName,
+                                        @RequestBody CommentRequestDto commentRequest) {
+
+        logger.info("Received request to add a comment to article {}", articleName);
+        CommentResponseDto responseDTO = commentService.createComment(commentRequest, articleName);
+        logger.info("Successfully added comment to article {}", articleName);
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(responseDTO.get_id())
+            .toUri();
+
+        return ResponseEntity.created(location).body(responseDTO);
     }
 }
