@@ -39,6 +39,7 @@ public class CommentService {
     }
 
     public List<CommentResponseDto> getAllCommentsOfArticle(String articleName) {
+        logger.info("Fetching comments for article: {}", articleName);
 
         List<Comment> comments = commentRepository.findByArticleName(articleName);
         // Return an empty list if no comments are found
@@ -46,13 +47,24 @@ public class CommentService {
             return Collections.emptyList();
         }
 
+        logger.info("Found {} comments for article: {}", comments.size(), articleName);
+
         // Convert the list of comments to a list of DTOs
-        return comments.stream()
-                .map(comment -> commentConverter.toDto(comment, authenticationService.getCurrentUserEmail()))
-                .collect(Collectors.toList());
+        String currentUserEmail = authenticationService.getCurrentUserEmail();
+        List<CommentResponseDto> commentDtos = comments.stream()
+            .map(comment -> {
+                logger.debug("Converting comment with ID {} for user {}", comment.getId(), currentUserEmail);
+                return commentConverter.toDto(comment, currentUserEmail);
+            })
+            .collect(Collectors.toList());
+
+
+        logger.info("Successfully converted comments for article: {}", articleName);
+        return commentDtos; 
+
     }
 
-    public List<CommentResponseDto> addComment(CommentRequestDto commentRequest, String article) {
+    public CommentResponseDto createComment(CommentRequestDto commentRequest, String article) {
 
         // Check if the article exists
         logger.debug("Checking if article with name {} exists", article);
@@ -75,8 +87,7 @@ public class CommentService {
         commentRepository.save(newComment);
 
         logger.info("Successfully saved comment with ID {} for article {}", newComment.getId(), article);
-        List<CommentResponseDto> comments = getAllCommentsOfArticle(article);
-        return comments;
+        return commentConverter.toDto(newComment, authenticationService.getCurrentUserEmail());
     }
 
     public void deleteCommentById(String id) {
