@@ -61,7 +61,7 @@ public class CommentController {
         return ResponseEntity.created(location).body(responseDTO);
     }
 
-    @DeleteMapping("/delete/{comment_id}")
+    @DeleteMapping("/{comment_id}")
     public ResponseEntity<String> deleteCommentById(@PathVariable("comment_id") String commentId) {
 
         logger.info("Received request to delete comment id {}", commentId);
@@ -70,7 +70,7 @@ public class CommentController {
         return ResponseEntity.ok("Comment deleted successfully");
     }
 
-    @PutMapping("/edit/{comment_id}")
+    @PutMapping("/{comment_id}")
     public ResponseEntity<CommentResponseDto> editComment(
                                         @PathVariable("comment_id") String id,
                                         @RequestBody CommentRequestDto updatedComment){

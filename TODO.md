@@ -11,5 +11,5 @@
     - [x] POST /api/articles/{article_id}/vote?type=down
     - [ ] GET /api/articles/{article_id}/comments
     - [ ] POST /api/articles/{article_id}/comments
-    - [ ] DELETE /api/comments/{comment_id}
-    - [ ] PUT  /api/comments/{comment_id}
+    - [x] DELETE /api/comments/{comment_id}
+    - [x] PUT  /api/comments/{comment_id}
