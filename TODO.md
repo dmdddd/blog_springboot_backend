@@ -6,10 +6,10 @@
 - [x] Update icon - post /api/comments/updateIcon
 - [ ] FE: arror when logging out and I'm in the edit user information window, need to reroute to main page(?)
 - [x] BE: Create API endpoint to add a new article
-- [ ] Change endpoints to follow best REST practices:
+- [x] Change endpoints to follow best REST practices:
     - [x] POST /api/articles/{article_id}/vote?type=up
     - [x] POST /api/articles/{article_id}/vote?type=down
-    - [ ] GET /api/articles/{article_id}/comments
-    - [ ] POST /api/articles/{article_id}/comments
+    - [x] GET /api/articles/{article_id}/comments
+    - [x] POST /api/articles/{article_id}/comments
     - [x] DELETE /api/comments/{comment_id}
     - [x] PUT  /api/comments/{comment_id}
