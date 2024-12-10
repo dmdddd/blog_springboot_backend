@@ -7,8 +7,8 @@
 - [ ] FE: arror when logging out and I'm in the edit user information window, need to reroute to main page(?)
 - [x] BE: Create API endpoint to add a new article
 - [ ] Change endpoints to follow best REST practices:
-    - [ ] POST /api/articles/{article_id}/vote?type=up
-    - [ ] POST /api/articles/{article_id}/vote?type=down
+    - [x] POST /api/articles/{article_id}/vote?type=up
+    - [x] POST /api/articles/{article_id}/vote?type=down
     - [ ] GET /api/articles/{article_id}/comments
     - [ ] POST /api/articles/{article_id}/comments
     - [ ] DELETE /api/comments/{comment_id}
