@@ -28,4 +28,15 @@ public class Article {
     private int upvotes = 0;
     @Field("upvoteIds")
     private List<String> upvoteIds = new ArrayList<>();
+
+
+    @Override
+    public String toString() {
+        return "Article{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", title='" + title + '\'' +
+                ", content=" + content +
+                '}';
+    }
 }

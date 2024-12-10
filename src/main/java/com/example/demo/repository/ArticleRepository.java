@@ -9,5 +9,3 @@ public interface ArticleRepository extends MongoRepository<Article, String> {
     Optional<Article> findByName(String name);
     boolean existsByName(String name);
 }
-
-

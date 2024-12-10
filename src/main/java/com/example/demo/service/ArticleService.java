@@ -1,5 +1,9 @@
 package com.example.demo.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -8,13 +12,21 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.converters.ArticleConverter;
+import com.example.demo.dto.ArticleRequestDto;
 import com.example.demo.dto.ArticleResponseDto;
 import com.example.demo.exceptions.ArticleNotFoundException;
+import com.example.demo.exceptions.DuplicateArticleException;
+import com.example.demo.exceptions.GlobalExceptionHandler;
+import com.example.demo.exceptions.InvalidSlugFormatException;
 import com.example.demo.model.Article;
 import com.example.demo.repository.ArticleRepository;
+import com.example.demo.validation.SlugValidator;
+
 
 @Service
 public class ArticleService {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private final ArticleRepository articleRepository;
     private final ArticleConverter articleConverter;
@@ -114,5 +126,40 @@ public class ArticleService {
 
         // Convert the updated article to a DTO and return it
         return articleConverter.toDto(updatedArticle);
+    }
+
+    public boolean existsBySlug(String slug) {
+
+        if (!SlugValidator.isValidSlug(slug)) {
+            throw new InvalidSlugFormatException("Invalid slug format for: " + slug);
+
+        }
+
+        return !articleRepository.existsByName(slug);
+    }
+
+    public ArticleResponseDto createArticle(ArticleRequestDto articleRequest) {
+        logger.debug("Checking if slug is valid for article {}", articleRequest.getName());
+
+        if (!SlugValidator.isValidSlug(articleRequest.getName())) {
+            throw new InvalidSlugFormatException("Invalid slug format for article: " + articleRequest.getName());
+        }
+
+        if (articleRepository.existsByName(articleRequest.getName())) {
+            logger.warn("Attempted to create an article with a duplicate slug: {}", articleRequest.getName());
+            throw new DuplicateArticleException("An article with the slug '" + articleRequest.getName() + "' already exists.");
+        }
+
+        Article newArticle = new Article(null, articleRequest.getName(), articleRequest.getTitle(),
+            Arrays.asList(articleRequest.getText().split("\n")), 0, new ArrayList<String>());
+
+
+        logger.debug("Saving new article {}", newArticle);
+
+        articleRepository.save(newArticle);
+        logger.info("Successfully saved article with ID: {} for blog: {}", newArticle.getId(), "");
+
+        return articleConverter.toDto(newArticle);
+
     }
 }

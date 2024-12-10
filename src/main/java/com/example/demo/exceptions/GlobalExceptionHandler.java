@@ -29,6 +29,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
+    @ExceptionHandler(InvalidSlugFormatException.class)
+    public ResponseEntity<ErrorResponse> InvalidSlugFormatException(InvalidSlugFormatException ex) {
+        logger.warn("Illegal slug: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse("BAD_REQUEST", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(DuplicateArticleException.class)
+    public ResponseEntity<ErrorResponse> DuplicateArticleException(DuplicateArticleException ex) {
+        logger.warn("Article with this slug already exists: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse("CONFLICT", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         logger.error("Unexpected error occurred: ", ex); // Log stack trace

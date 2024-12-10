@@ -2,6 +2,7 @@ package com.example.demo.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -20,6 +21,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth
                             // Articles
+                            .requestMatchers(HttpMethod.POST, "/api/articles").authenticated() // Require authentication for POST to /api/articles
                             .requestMatchers("/api/articles/*/downvote").authenticated()    // Require authentication
                             .requestMatchers("/api/articles/*/upvote").authenticated()      // Require authentication
                             .requestMatchers("/api/articles/checkName/*").authenticated()    // Require authentication
@@ -29,7 +31,9 @@ public class SecurityConfig {
                             .requestMatchers("/api/comments/add/*").authenticated()        // Require authentication
                             .requestMatchers("/api/comments/edit/*").authenticated()        // Require authentication
                             .requestMatchers("/api/comments/updateIcon").authenticated()    // Require authentication
-                            .anyRequest().permitAll())                                                  // Other endpoints open
+                            // Fallback for any other requests
+                            .anyRequest().permitAll())
+                            
                     .addFilterBefore(firebaseTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
             return http.build();
