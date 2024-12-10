@@ -5,6 +5,7 @@
 - [x] Add endpoint for editing a comment - put /api/comments/edit/:id
 - [x] Update icon - post /api/comments/updateIcon
 - [ ] FE: arror when logging out and I'm in the edit user information window, need to reroute to main page(?)
+- [x] BE: Create API endpoint to add a new article
 - [ ] Change endpoints to follow best REST practices:
     - [ ] POST /api/articles/{article_id}/vote?type=up
     - [ ] POST /api/articles/{article_id}/vote?type=down
