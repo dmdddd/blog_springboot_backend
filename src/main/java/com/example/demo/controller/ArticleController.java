@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -48,21 +49,12 @@ public class ArticleController {
         return ResponseEntity.ok(articleResponseDto); // Return ArticleDTO with 200 OK
     }
 
-    @PutMapping("/{article_name}/upvote")
-    public ResponseEntity<ArticleResponseDto> upvoteArticle(@PathVariable("article_name") String articleName) {
-
+    @PutMapping("/{article_name}/vote")
+    public ResponseEntity<ArticleResponseDto> voteOnArticle(@PathVariable("article_name") String articleName, @RequestParam("type") String voteType) {
+        logger.info("Request vote type received: " + voteType);
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        ArticleResponseDto updatedArticle = articleService.upvoteArticle(articleName, userId);
-        return ResponseEntity.ok(updatedArticle); // Return the updated article DTO with 200 OK
-    }
-
-    @PutMapping("/{article_name}/downvote")
-    public ResponseEntity<ArticleResponseDto> downvoteArticle(@PathVariable("article_name") String articleName) {
-
-        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        ArticleResponseDto downdatedArticle = articleService.downvoteArticle(articleName, userId);
+        ArticleResponseDto downdatedArticle = articleService.voteOnArticle(articleName, voteType, userId);
         return ResponseEntity.ok(downdatedArticle); // Return the updated article DTO with 200 OK
     }
 

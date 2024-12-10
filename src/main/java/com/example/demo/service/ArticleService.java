@@ -61,18 +61,7 @@ public class ArticleService {
                 .orElseThrow(() -> new ArticleNotFoundException("Article not found with name: " + name)); // Throw exception if empty
     }
 
-    // public Article saveArticle(Article article) {
-    //     validateArticle(article);
-    //     return articleRepository.save(article); // Uses the default `save` method
-    // }
-
-    // private void validateArticle(Article article) {
-    //     if (article.getName() == null || article.getName().isEmpty()) {
-    //         throw new IllegalArgumentException("Article name cannot be null or empty");
-    //     }
-    // }
-
-    public ArticleResponseDto upvoteArticle(String articleName, String userId) {
+    public ArticleResponseDto voteOnArticle(String articleName, String voteType, String userId) {
 
         // Fetch the article by name from the repository
         Optional<Article> articleOptional = articleRepository.findByName(articleName);
@@ -85,41 +74,25 @@ public class ArticleService {
         // Extract the Article object from the Optional
         Article article = articleOptional.get();
 
-        // Check if the user has already upvoted
-        if (article.getUpvoteIds().contains(userId)) {
-            throw new IllegalStateException("User has already upvoted this article.");
+
+        if (voteType.equalsIgnoreCase("up")) {
+            // Upvote
+            // Check if the user has already upvoted
+            if (article.getUpvoteIds().contains(userId)) {
+                throw new IllegalStateException("User has already upvoted this article.");
+            }
+
+            article.getUpvoteIds().add(userId);             // Add the user ID to the upvote list
+            article.setUpvotes(article.getUpvotes() + 1);   // Increment upvotes
+        } else {
+            // Downvote
+            // Check if the user has already downvoted
+            if (!article.getUpvoteIds().contains(userId)) {
+                throw new IllegalStateException("User has already downvoted this article.");
+            }
+            article.getUpvoteIds().remove(userId);             // Remove the user ID to the upvote list
+            article.setUpvotes(article.getUpvotes() - 1); 
         }
-
-        article.getUpvoteIds().add(userId);             // Add the user ID to the upvote list
-        article.setUpvotes(article.getUpvotes() + 1);   // Increment upvotes
-
-        // Save the updated article to the repository
-        Article updatedArticle = articleRepository.save(article);
-
-        // Convert the updated article to a DTO and return it
-        return articleConverter.toDto(updatedArticle);
-    }
-
-    public ArticleResponseDto downvoteArticle(String articleName, String userId) {
-
-        // Fetch the article by name from the repository
-        Optional<Article> articleOptional = articleRepository.findByName(articleName);
-
-        // Handle the absence of the article
-        if (articleOptional.isEmpty()) {
-            throw new ArticleNotFoundException("Article not found with name: " + articleName);
-        }
-
-        // Extract the Article object from the Optional
-        Article article = articleOptional.get();
-
-        // Check if the user has already upvoted
-        if (!article.getUpvoteIds().contains(userId)) {
-            throw new IllegalStateException("User has already downvoted this article.");
-        }
-        
-        article.getUpvoteIds().remove(userId);             // Remove the user ID to the upvote list
-        article.setUpvotes(article.getUpvotes() - 1);      // Decrement upvotes
 
         // Save the updated article to the repository
         Article updatedArticle = articleRepository.save(article);
