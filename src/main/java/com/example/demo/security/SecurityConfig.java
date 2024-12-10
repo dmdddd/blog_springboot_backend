@@ -21,15 +21,13 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth
                             // Articles
-                            .requestMatchers(HttpMethod.POST, "/api/articles").authenticated() // Require authentication for POST to /api/articles
-                            .requestMatchers("/api/articles/*/downvote").authenticated()    // Require authentication
-                            .requestMatchers("/api/articles/*/upvote").authenticated()      // Require authentication
-                            .requestMatchers("/api/articles/checkName/*").authenticated()    // Require authentication
+                            .requestMatchers(HttpMethod.POST, "/api/articles").authenticated() // Require authentication for POST
+                            .requestMatchers("/api/articles/*/vote").authenticated()        // Require authentication
+                            .requestMatchers("/api/articles/checkName/*").authenticated()   // Require authentication
                             .requestMatchers("/api/articles/*").permitAll()                 // Open access
                             // Comments
-                            .requestMatchers("/api/comments/delete/*").authenticated()      // Require authentication
-                            .requestMatchers("/api/comments/add/*").authenticated()        // Require authentication
-                            .requestMatchers("/api/comments/edit/*").authenticated()        // Require authentication
+                            .requestMatchers(HttpMethod.POST, "/api/articles/*/comments").authenticated() // Require authentication for POST
+                            .requestMatchers("/api/comments/*").authenticated()             // Require authentication
                             .requestMatchers("/api/comments/updateIcon").authenticated()    // Require authentication
                             // Fallback for any other requests
                             .anyRequest().permitAll())
