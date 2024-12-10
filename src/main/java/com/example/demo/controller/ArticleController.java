@@ -1,23 +1,35 @@
 package com.example.demo.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
+import com.example.demo.dto.ArticleRequestDto;
 import com.example.demo.dto.ArticleResponseDto;
+import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.service.ArticleService;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
 @RequestMapping("/api/articles")
 public class ArticleController {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @Autowired
     private ArticleService articleService;
 
@@ -54,4 +66,25 @@ public class ArticleController {
         return ResponseEntity.ok(downdatedArticle); // Return the updated article DTO with 200 OK
     }
 
+    @GetMapping("/checkSlug/{slug}")
+    public ResponseEntity<Map<String, Boolean>> checkSlug(@PathVariable String slug) {
+        boolean isUnique = articleService.existsBySlug(slug);
+        return ResponseEntity.ok(Map.of("isUnique", isUnique));
+    }
+
+    @PostMapping
+    public ResponseEntity<ArticleResponseDto> createArticle(@RequestBody ArticleRequestDto articleRequest) {
+        logger.info("Received request to create a new article: {}", articleRequest.getTitle());
+
+        ArticleResponseDto newArticle = articleService.createArticle(articleRequest);
+
+        logger.info("Successfully added a new article with ID: {}", newArticle.getId());
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(newArticle.getId())
+            .toUri();
+
+        return ResponseEntity.created(location).body(newArticle);
+    }
 }
