@@ -19,6 +19,8 @@ public class Comment {
     private String postedBy;
     @Field("text")
     private String text;
+    @Field("blog")
+    private String blog;
     @Field("articleName")
     private String articleName;
     @Field("userEmail")
