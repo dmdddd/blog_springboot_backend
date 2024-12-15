@@ -4,7 +4,8 @@ import lombok.Data;
 
 @Data
 public class ArticleRequestDto {
-    private String title;
+    private String blog;
     private String name;
+    private String title;
     private String text;
 }

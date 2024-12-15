@@ -9,7 +9,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(23)
 	}
 }
 
@@ -30,6 +30,7 @@ dependencies {
 	testImplementation("org.mockito:mockito-core:5.5.0")
     implementation("com.google.firebase:firebase-admin:9.1.1") // Firebase Admin SDK for Authentication
     implementation("org.springframework.boot:spring-boot-starter-security") // Spring Boot Security
+	implementation("org.springframework.boot:spring-boot-starter-actuator") // Mapping endpoints
 }
 
 tasks.withType<Test> {

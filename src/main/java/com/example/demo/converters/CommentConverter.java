@@ -21,6 +21,7 @@ public class CommentConverter {
             comment.getId(), 
             comment.getPostedBy(), 
             comment.getText(), 
+            comment.getBlog(),
             comment.getArticleName(), 
             comment.getUserEmail(), 
             comment.getUserIcon(), 
@@ -28,7 +29,6 @@ public class CommentConverter {
             canUserDeleteComment(comment, email)
         );
     }
-
 
      public List<CommentResponseDto> toDtoList(List<Comment> comments, String email) {
 
@@ -45,10 +45,4 @@ public class CommentConverter {
         return comment.getUserEmail().equals(email);
         // return comment.getUserEmail().equals(currentUserEmail) || isAdmin(currentUserEmail);
     }
-
-    // // TODO: adjust for permissions
-    // private boolean isAdmin(String username) {
-    //     // Placeholder for admin check logic
-    //     return "admin".equals(username);
-    // }
 }

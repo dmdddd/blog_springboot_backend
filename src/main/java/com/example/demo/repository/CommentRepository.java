@@ -6,6 +6,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import com.example.demo.model.Comment;
 
 public interface CommentRepository extends MongoRepository<Comment, String>, CommentRepositoryCustom {
-    List<Comment> findByArticleName(String name);
+    List<Comment> findByBlogAndArticleName(String blog, String name);
 }
 

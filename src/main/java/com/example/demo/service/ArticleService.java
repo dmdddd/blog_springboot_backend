@@ -19,6 +19,7 @@ import com.example.demo.exceptions.DuplicateArticleException;
 import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.exceptions.InvalidSlugFormatException;
 import com.example.demo.model.Article;
+import com.example.demo.model.Comment;
 import com.example.demo.repository.ArticleRepository;
 import com.example.demo.validation.SlugValidator;
 
@@ -37,11 +38,11 @@ public class ArticleService {
         this.articleConverter = articleConverter;
     }
 
-    public List<ArticleResponseDto> getAllArticles() {
+    public List<ArticleResponseDto> getArticlesByBlog(String blog) {
        
-        List<Article> articles = articleRepository.findAll();
+        List<Article> articles = articleRepository.findByBlog(blog);
 
-        // Return an empty list if no articles are found
+        // Return an empty list if no comments are found
         if (articles.isEmpty()) {
             return Collections.emptyList();
         }
@@ -52,8 +53,8 @@ public class ArticleService {
                 .collect(Collectors.toList());
     }
 
-    public ArticleResponseDto getArticleByName(String name) {
-        Optional<Article> articleOptional = articleRepository.findByName(name);
+    public ArticleResponseDto findByBlogAndName(String blog, String name) {
+        Optional<Article> articleOptional = articleRepository.findByBlogAndName(blog, name);
 
         // Handle Optional, either return DTO or throw exception if article not found
         return articleOptional
@@ -61,10 +62,10 @@ public class ArticleService {
                 .orElseThrow(() -> new ArticleNotFoundException("Article not found with name: " + name)); // Throw exception if empty
     }
 
-    public ArticleResponseDto voteOnArticle(String articleName, String voteType, String userId) {
+    public ArticleResponseDto voteOnArticle(String blog, String articleName, String voteType, String userId) {
 
         // Fetch the article by name from the repository
-        Article article = articleRepository.findByName(articleName)
+        Article article = articleRepository.findByBlogAndName(blog, articleName)
             .orElseThrow(() -> new ArticleNotFoundException("Article not found with name: " + articleName));
 
         logger.info("User {} is trying to {}vote on article: {}", userId, voteType, articleName);
@@ -109,14 +110,14 @@ public class ArticleService {
         return articleConverter.toDto(updatedArticle);
     }
 
-    public boolean existsBySlug(String slug) {
+    public boolean existsByBlogAndSlug(String blog, String slug) {
 
         if (!SlugValidator.isValidSlug(slug)) {
             throw new InvalidSlugFormatException("Invalid slug format for: " + slug);
 
         }
 
-        return !articleRepository.existsByName(slug);
+        return !articleRepository.existsByBlogAndName(blog, slug);
     }
 
     public ArticleResponseDto createArticle(ArticleRequestDto articleRequest) {
@@ -126,12 +127,12 @@ public class ArticleService {
             throw new InvalidSlugFormatException("Invalid slug format for article: " + articleRequest.getName());
         }
 
-        if (articleRepository.existsByName(articleRequest.getName())) {
+        if (articleRepository.existsByBlogAndName(articleRequest.getBlog(), articleRequest.getName())) {
             logger.warn("Attempted to create an article with a duplicate slug: {}", articleRequest.getName());
             throw new DuplicateArticleException("An article with the slug '" + articleRequest.getName() + "' already exists.");
         }
 
-        Article newArticle = new Article(null, articleRequest.getName(), articleRequest.getTitle(),
+        Article newArticle = new Article(null, articleRequest.getName(), articleRequest.getBlog(), articleRequest.getTitle(),
             Arrays.asList(articleRequest.getText().split("\n")), 0, new ArrayList<String>());
 
 

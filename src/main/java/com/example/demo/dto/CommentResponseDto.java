@@ -11,6 +11,7 @@ public class CommentResponseDto {
     private final String _id;
     private final String postedBy;
     private final String text;
+    private final String blog;
     private final String articleName;
     private final String userEmail;
     private final String userIcon;

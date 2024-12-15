@@ -15,9 +15,23 @@ public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     
+    @ExceptionHandler(BlogNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleBlogNotFoundException(BlogNotFoundException ex) {
+        logger.warn("Blog not found: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse("NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+    
     @ExceptionHandler(ArticleNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleArticleNotFoundException(ArticleNotFoundException ex) {
         logger.warn("Article not found: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse("NOT_FOUND", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(PageNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePageNotFoundException(PageNotFoundException ex) {
+        logger.warn("Page not found: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("NOT_FOUND", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }

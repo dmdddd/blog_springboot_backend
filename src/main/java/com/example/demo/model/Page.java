@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -14,32 +15,37 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor // Generates a constructor with all fields
 @NoArgsConstructor  // Needed to use default for fields
-@Document(collection = "articles")
-public class Article {
+@Document(collection = "pages")
+public class Page {
     @Id
     private String id;
-    @Field("name")
-    private String name;
     @Field("blog")
     private String blog;
+    @Field("slug")
+    private String slug;
     @Field("title")
     private String title;
     @Field("content")
-    private List<String> content;
-    @Field("upvotes")
-    private int upvotes = 0;
-    @Field("upvoteIds")
-    private List<String> upvoteIds = new ArrayList<>();
+    private String content;
+    @Field("order")
+    private int order;
+    @Field("createdAt")
+    private Date createdAt;
+    @Field("updatedAt")
+    private Date updatedAt;
 
 
     @Override
     public String toString() {
-        return "Article{" +
+        return "Page{" +
                 "id='" + id + '\'' +
                 ", blog='" + blog + '\'' +
-                ", name='" + name + '\'' +
+                ", slug='" + slug + '\'' +
                 ", title='" + title + '\'' +
-                ", content=" + content +
+                ", content='" + content + '\'' +
+                ", order='" + order + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                ", updatedAt=" + updatedAt +
                 '}';
     }
 }

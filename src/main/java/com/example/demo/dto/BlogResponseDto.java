@@ -1,6 +1,7 @@
 package com.example.demo.dto;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -8,14 +9,12 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor // Generates a constructor with all fields
-public class ArticleResponseDto {
+public class BlogResponseDto {
     private String id;
     private String name;
-    private String blog;
     private String title;
-    private List<String> content;
-    private int upvotes = 0;
-    private List<String> upvoteIds = new ArrayList<>();
-    // DTO only fields
-    private final boolean canUpvote;
+    private String description;
+    private Date createdOn;
+    private List<String> admins = new ArrayList<>();
+
 }

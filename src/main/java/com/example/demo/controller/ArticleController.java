@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
-@RequestMapping("/api/articles")
+@RequestMapping("/api/blogs/{blog_name}/articles")
 public class ArticleController {
     
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
@@ -42,37 +42,37 @@ public class ArticleController {
 
     // GET endpoint to retrieve all articles
     @GetMapping
-    public ResponseEntity<List<ArticleResponseDto>> getAllArticles() {
+    public ResponseEntity<List<ArticleResponseDto>> getArticlesByBlog(@PathVariable("blog_name") String blog) {
 
-        List<ArticleResponseDto> articles = articleService.getAllArticles();
+        List<ArticleResponseDto> articles = articleService.getArticlesByBlog(blog);
         return ResponseEntity.ok(articles); // 200 OK with the articles
     }
 
     @GetMapping("/{article_name}")
-    public ResponseEntity<ArticleResponseDto> getArticle(@PathVariable("article_name") String name) {
+    public ResponseEntity<ArticleResponseDto> getArticleByBlogByName(@PathVariable("blog_name") String blog, @PathVariable("article_name") String name) {
 
-        ArticleResponseDto articleResponseDto = articleService.getArticleByName(name);
+        ArticleResponseDto articleResponseDto = articleService.findByBlogAndName(blog, name);
         return ResponseEntity.ok(articleResponseDto); // Return ArticleDTO with 200 OK
     }
 
     @PutMapping("/{article_name}/vote")
-    public ResponseEntity<ArticleResponseDto> voteOnArticle(@PathVariable("article_name") String articleName, @RequestParam("type") String voteType) {
-        logger.info("Request vote type received: " + voteType);
+    public ResponseEntity<ArticleResponseDto> voteOnArticle(@PathVariable("blog_name") String blog, @PathVariable("article_name") String article, @RequestParam("type") String voteType) {
+        logger.info("Request vote on article: {} for blog: {}, type: {} received", blog, article, voteType);
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        ArticleResponseDto downdatedArticle = articleService.voteOnArticle(articleName, voteType, userId);
+        ArticleResponseDto downdatedArticle = articleService.voteOnArticle(blog, article, voteType, userId);
         return ResponseEntity.ok(downdatedArticle); // Return the updated article DTO with 200 OK
     }
 
     @GetMapping("/checkSlug/{slug}")
-    public ResponseEntity<Map<String, Boolean>> checkSlug(@PathVariable String slug) {
-        boolean isUnique = articleService.existsBySlug(slug);
+    public ResponseEntity<Map<String, Boolean>> checkSlug(@PathVariable("blog_name") String blog, @PathVariable String slug) {
+        boolean isUnique = articleService.existsByBlogAndSlug(blog, slug);
         return ResponseEntity.ok(Map.of("isUnique", isUnique));
     }
 
     @PostMapping
     public ResponseEntity<ArticleResponseDto> createArticle(@RequestBody ArticleRequestDto articleRequest) {
-        logger.info("Received request to create a new article: {}", articleRequest.getTitle());
+        logger.info("Received request to s new article: {}", articleRequest.getTitle());
 
         ArticleResponseDto newArticle = articleService.createArticle(articleRequest);
 
@@ -84,31 +84,5 @@ public class ArticleController {
             .toUri();
 
         return ResponseEntity.created(location).body(newArticle);
-    }
-
-    @GetMapping("/{article_name}/comments")
-    public ResponseEntity<List<CommentResponseDto>> getAllCommentsOfArticle(@PathVariable("article_name") String articleName) {
-        logger.info("Received request to get all comments for article: {}", articleName);
-
-        List<CommentResponseDto> comments = commentService.getAllCommentsOfArticle(articleName);
-        logger.info("Found {} comments for article: {}", comments.size(), articleName);
-        return ResponseEntity.ok(comments); // 200 OK with the comments
-    }
-
-    @PostMapping("/{article_name}/comments")
-    public ResponseEntity<CommentResponseDto> addCommentToArticle(
-                                        @PathVariable("article_name") String articleName,
-                                        @RequestBody CommentRequestDto commentRequest) {
-
-        logger.info("Received request to add a comment to article {}", articleName);
-        CommentResponseDto responseDTO = commentService.createComment(commentRequest, articleName);
-        logger.info("Successfully added comment to article {}", articleName);
-
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-            .path("/{id}")
-            .buildAndExpand(responseDTO.get_id())
-            .toUri();
-
-        return ResponseEntity.created(location).body(responseDTO);
     }
 }

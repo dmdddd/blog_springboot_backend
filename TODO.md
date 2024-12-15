@@ -13,3 +13,9 @@
     - [x] POST /api/articles/{article_id}/comments
     - [x] DELETE /api/comments/{comment_id}
     - [x] PUT  /api/comments/{comment_id}
+
+
+
+
+Ideas:
+Blog page editing history - keep a history of edits so users can revert to previous versions if needed.

@@ -38,10 +38,10 @@ public class CommentService {
         this.authenticationService = authenticationService;
     }
 
-    public List<CommentResponseDto> getAllCommentsOfArticle(String articleName) {
+    public List<CommentResponseDto> getCommentsByBlogAndArticle(String blog, String articleName) {
         logger.info("Fetching comments for article: {}", articleName);
 
-        List<Comment> comments = commentRepository.findByArticleName(articleName);
+        List<Comment> comments = commentRepository.findByBlogAndArticleName(blog, articleName);
         // Return an empty list if no comments are found
         if (comments.isEmpty()) {
             return Collections.emptyList();
@@ -64,12 +64,12 @@ public class CommentService {
 
     }
 
-    public CommentResponseDto createComment(CommentRequestDto commentRequest, String article) {
+    public CommentResponseDto createComment(CommentRequestDto commentRequest, String blog, String article) {
 
         // Check if the article exists
-        logger.debug("Checking if article with name {} exists", article);
-        if (!articleRepository.existsByName(article)) {
-            throw new ArticleNotFoundException("Article with name " + article + " not found");
+        logger.debug("Checking if article with name {} exists in blog {}", article, blog);
+        if (!articleRepository.existsByBlogAndName(blog, article)) {
+            throw new ArticleNotFoundException("Article with name " + article + " not found in blog " + blog);
         }
 
         Comment newComment = new Comment(
@@ -77,6 +77,7 @@ public class CommentService {
             null, // ID will be auto-generated
             authenticationService.getCurrentUserName(),   // name of the user, for example "Dan"
             commentRequest.getText(),
+            blog,
             article,
             authenticationService.getCurrentUserEmail(),
             authenticationService.getCurrentUserPhotoUrl(),
