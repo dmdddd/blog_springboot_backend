@@ -1,6 +1,7 @@
 package com.example.demo.dto;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -13,9 +14,12 @@ public class ArticleResponseDto {
     private String name;
     private String blog;
     private String title;
-    private List<String> content;
+    private String content;
     private int upvotes = 0;
     private List<String> upvoteIds = new ArrayList<>();
-    // DTO only fields
-    private final boolean canUpvote;
+    private final boolean canUpvote; // DTO only field
+    private String author;
+    private Date createdAt;
+    private Date updatedAt;
+    
 }

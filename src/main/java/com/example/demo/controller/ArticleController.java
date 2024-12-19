@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,8 +23,8 @@ import com.example.demo.dto.ArticleResponseDto;
 import com.example.demo.dto.CommentRequestDto;
 import com.example.demo.dto.CommentResponseDto;
 import com.example.demo.exceptions.GlobalExceptionHandler;
+import com.example.demo.model.Article;
 import com.example.demo.service.ArticleService;
-import com.example.demo.service.CommentService;
 
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,8 +38,6 @@ public class ArticleController {
 
     @Autowired
     private ArticleService articleService;
-    @Autowired
-    private CommentService commentService;
 
     // GET endpoint to retrieve all articles
     @GetMapping
@@ -84,5 +83,25 @@ public class ArticleController {
             .toUri();
 
         return ResponseEntity.created(location).body(newArticle);
+    }
+
+    @DeleteMapping("/{article_name}")
+    public ResponseEntity<Void> deleteArticle(@PathVariable("blog_name") String blog, @PathVariable("article_name") String article) {
+        logger.info("Received request to delete article: {}, blog: {}", article, blog);
+        articleService.deleteArticleByBlogAndSlug(blog, article);
+        logger.info("Successfully deleted article: {}, blog: {}", article, blog);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{article_name}")
+    public ResponseEntity<ArticleResponseDto> editArticle(
+                                        @PathVariable("blog_name") String blog,
+                                        @PathVariable("article_name") String article,
+                                        @RequestBody ArticleRequestDto articleRequest){
+        logger.info("Received reqest to update article {}, blog:  {}", article, blog);
+        ArticleResponseDto updatedArticle = articleService.updateArticle(blog, article, articleRequest);
+        logger.info("Successfully updated article {}, blog:  {}", article, blog);
+        return ResponseEntity.ok(updatedArticle); // Return the response DTO back to the client
     }
 }

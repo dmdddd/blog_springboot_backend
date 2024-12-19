@@ -29,11 +29,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
+    @ExceptionHandler(SlugAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleSlugAlreadyExistsException(SlugAlreadyExistsException ex) {
+        logger.warn("Slug already exists: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse("CONFLICT", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
     @ExceptionHandler(PageNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlePageNotFoundException(PageNotFoundException ex) {
         logger.warn("Page not found: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("NOT_FOUND", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRequestException(InvalidRequestException ex) {
+        logger.warn("Invalid reqest: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse("BAD_REQUEST", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(IllegalStateException.class)

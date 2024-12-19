@@ -10,4 +10,5 @@ public interface ArticleRepository extends MongoRepository<Article, String> {
     List<Article> findByBlog(String blogName);
     Optional<Article> findByBlogAndName(String blogName, String articleName);
     boolean existsByBlogAndName(String blog, String name);
+    void deleteByBlogAndName(String blog, String name);
 }

@@ -3,8 +3,8 @@ package com.example.demo.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,11 +17,13 @@ import com.example.demo.dto.ArticleResponseDto;
 import com.example.demo.exceptions.ArticleNotFoundException;
 import com.example.demo.exceptions.DuplicateArticleException;
 import com.example.demo.exceptions.GlobalExceptionHandler;
+import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.InvalidSlugFormatException;
 import com.example.demo.model.Article;
-import com.example.demo.model.Comment;
 import com.example.demo.repository.ArticleRepository;
 import com.example.demo.validation.SlugValidator;
+
+import jakarta.transaction.Transactional;
 
 
 @Service
@@ -31,11 +33,13 @@ public class ArticleService {
 
     private final ArticleRepository articleRepository;
     private final ArticleConverter articleConverter;
+    private final AuthenticationService authenticationService;
 
     // Constructor injection
-    public ArticleService(ArticleRepository articleRepository, ArticleConverter articleConverter) {
+    public ArticleService(ArticleRepository articleRepository, ArticleConverter articleConverter, AuthenticationService authenticationService) {
         this.articleRepository = articleRepository;
         this.articleConverter = articleConverter;
+        this.authenticationService = authenticationService;
     }
 
     public List<ArticleResponseDto> getArticlesByBlog(String blog) {
@@ -59,7 +63,7 @@ public class ArticleService {
         // Handle Optional, either return DTO or throw exception if article not found
         return articleOptional
                 .map(articleConverter::toDto) // Convert Article to DTO if present
-                .orElseThrow(() -> new ArticleNotFoundException("Article not found with name: " + name)); // Throw exception if empty
+                .orElseThrow(() -> new ArticleNotFoundException("Article not found with name: " + name + ", blog: " + blog)); // Throw exception if empty
     }
 
     public ArticleResponseDto voteOnArticle(String blog, String articleName, String voteType, String userId) {
@@ -132,8 +136,9 @@ public class ArticleService {
             throw new DuplicateArticleException("An article with the slug '" + articleRequest.getName() + "' already exists.");
         }
 
+        String user = authenticationService.getCurrentUserName() != null ? authenticationService.getCurrentUserName() : authenticationService.getCurrentUserEmail();
         Article newArticle = new Article(null, articleRequest.getName(), articleRequest.getBlog(), articleRequest.getTitle(),
-            Arrays.asList(articleRequest.getText().split("\n")), 0, new ArrayList<String>());
+            articleRequest.getText(), 0, new ArrayList<String>(), user, new Date(), null);
 
 
         logger.debug("Saving new article {}", newArticle);
@@ -142,6 +147,58 @@ public class ArticleService {
         logger.info("Successfully saved article with ID: {} for blog: {}", newArticle.getId(), "");
 
         return articleConverter.toDto(newArticle);
+    }
 
+    public void deleteArticleByBlogAndSlug(String blog, String article) {
+
+        if (!articleRepository.existsByBlogAndName(blog, article)) {
+            new ArticleNotFoundException("Article not found with name: " + article + ", blog: " + blog);
+        }
+        articleRepository.deleteByBlogAndName(blog, article);
+        logger.info("Successfully deleted article {}, blog: {}", article, blog);
+    }
+
+    @Transactional
+    public ArticleResponseDto updateArticle(String blog, String articleSlug, ArticleRequestDto articleRequest) {
+
+        Optional<Article> existingArticle = articleRepository.findByBlogAndName(blog, articleSlug);
+        if (existingArticle.isEmpty()) {
+            throw new ArticleNotFoundException("Article " + articleSlug + ", blog: " + blog + " not found");
+        }
+
+        Article article = existingArticle.get();
+
+        // Ensure both name (slug) and title are provided together
+        if ((articleRequest.getName() != null && articleRequest.getTitle() == null) ||
+            (articleRequest.getTitle() != null && articleRequest.getName() == null)) {
+            throw new InvalidRequestException("Both article name (slug) and title must be provided together.");
+        }
+
+        // Check if the slug is being updated
+        if (articleRequest.getName() != null && !articleRequest.getName().equals(article.getName())) {
+            Optional<Article> potentialArticle = articleRepository.findByBlogAndName(blog, articleRequest.getName());
+            // Ensure the new slug doesn't already exist in the blog
+            if (!potentialArticle.isEmpty()) {
+                throw new DuplicateArticleException("Slug '" + articleRequest.getName() + "' already exists in blog '" + blog + "'.");
+            }
+
+            // Update the comments with the new slug
+            // TODO
+
+            // Update the article slug and title
+            article.setName(articleRequest.getName());
+            article.setTitle(articleRequest.getTitle());
+        }
+
+        if (articleRequest.getText() != null) {
+            article.setContent(articleRequest.getText());
+        }
+
+        article.setUpdatedAt(new Date()); 
+
+        // Save the updated article
+        articleRepository.save(article);
+
+        return articleConverter.toDto(article);
     }
 }

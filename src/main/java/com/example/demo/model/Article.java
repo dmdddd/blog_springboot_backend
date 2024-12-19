@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -25,11 +26,17 @@ public class Article {
     @Field("title")
     private String title;
     @Field("content")
-    private List<String> content;
+    private String content;
     @Field("upvotes")
     private int upvotes = 0;
     @Field("upvoteIds")
     private List<String> upvoteIds = new ArrayList<>();
+    @Field("author")
+    private String author;
+    @Field("createdAt")
+    private Date createdAt;
+    @Field("updatedAt")
+    private Date updatedAt;
 
 
     @Override
@@ -39,7 +46,10 @@ public class Article {
                 ", blog='" + blog + '\'' +
                 ", name='" + name + '\'' +
                 ", title='" + title + '\'' +
-                ", content=" + content +
+                ", content=" + content + '\'' +
+                ", author=" + author + '\'' +
+                ", createdAt=" + createdAt + '\'' +
+                ", updatedAt=" + updatedAt +
                 '}';
     }
 }

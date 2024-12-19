@@ -27,7 +27,7 @@ public class ArticleConverter {
         }
 
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return new ArticleResponseDto(article.getId(), article.getName(), article.getBlog(), article.getTitle(), article.getContent(), article.getUpvotes(), article.getUpvoteIds(), useCanUpvoteArticle(article, userId));
+        return new ArticleResponseDto(article.getId(), article.getName(), article.getBlog(), article.getTitle(), article.getContent(), article.getUpvotes(), article.getUpvoteIds(), useCanUpvoteArticle(article, userId), article.getAuthor(), article.getCreatedAt(), article.getUpdatedAt());
     }
 
     /**
