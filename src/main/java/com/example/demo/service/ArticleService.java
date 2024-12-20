@@ -24,6 +24,7 @@ import com.example.demo.repository.ArticleRepository;
 import com.example.demo.validation.SlugValidator;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 
 @Service
@@ -34,12 +35,14 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final ArticleConverter articleConverter;
     private final AuthenticationService authenticationService;
+    private final CommentService commentService;
 
     // Constructor injection
-    public ArticleService(ArticleRepository articleRepository, ArticleConverter articleConverter, AuthenticationService authenticationService) {
+    public ArticleService(ArticleRepository articleRepository, ArticleConverter articleConverter, AuthenticationService authenticationService, CommentService commentService) {
         this.articleRepository = articleRepository;
         this.articleConverter = articleConverter;
         this.authenticationService = authenticationService;
+        this.commentService = commentService;
     }
 
     public List<ArticleResponseDto> getArticlesByBlog(String blog) {
@@ -138,7 +141,7 @@ public class ArticleService {
 
         String user = authenticationService.getCurrentUserName() != null ? authenticationService.getCurrentUserName() : authenticationService.getCurrentUserEmail();
         Article newArticle = new Article(null, articleRequest.getName(), articleRequest.getBlog(), articleRequest.getTitle(),
-            articleRequest.getText(), 0, new ArrayList<String>(), user, new Date(), null);
+            articleRequest.getContent(), 0, new ArrayList<String>(), user, new Date(), null);
 
 
         logger.debug("Saving new article {}", newArticle);
@@ -176,22 +179,26 @@ public class ArticleService {
 
         // Check if the slug is being updated
         if (articleRequest.getName() != null && !articleRequest.getName().equals(article.getName())) {
-            Optional<Article> potentialArticle = articleRepository.findByBlogAndName(blog, articleRequest.getName());
+
+            String newArtcileSlug = articleRequest.getName();
+            String previousArticleSlug = article.getName();
+
+            Optional<Article> potentialArticle = articleRepository.findByBlogAndName(blog, newArtcileSlug);
             // Ensure the new slug doesn't already exist in the blog
             if (!potentialArticle.isEmpty()) {
-                throw new DuplicateArticleException("Slug '" + articleRequest.getName() + "' already exists in blog '" + blog + "'.");
+                throw new DuplicateArticleException("Slug '" + newArtcileSlug + "' already exists in blog '" + blog + "'.");
             }
 
             // Update the comments with the new slug
-            // TODO
+            commentService.updateCommentsArticleName(blog, previousArticleSlug, newArtcileSlug);
 
             // Update the article slug and title
-            article.setName(articleRequest.getName());
+            article.setName(newArtcileSlug);
             article.setTitle(articleRequest.getTitle());
         }
 
-        if (articleRequest.getText() != null) {
-            article.setContent(articleRequest.getText());
+        if (articleRequest.getContent() != null) {
+            article.setContent(articleRequest.getContent());
         }
 
         article.setUpdatedAt(new Date()); 

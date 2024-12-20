@@ -1,9 +1,15 @@
 package com.example.demo.exceptions;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -76,5 +82,19 @@ public class GlobalExceptionHandler {
         logger.error("Unexpected error occurred: ", ex); // Log stack trace
         ErrorResponse errorResponse = new ErrorResponse("INTERNAL_SERVER_ERROR", "An unexpected error occurred");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+
+    // Handle validation errors
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+
+        ValidationErrorResponse validationErrorResponse = new ValidationErrorResponse();
+
+        List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
+        for (FieldError error : fieldErrors) {
+            validationErrorResponse.addError(error.getField(), error.getDefaultMessage());
+        }
+
+        return ResponseEntity.badRequest().body(validationErrorResponse);
     }
 }

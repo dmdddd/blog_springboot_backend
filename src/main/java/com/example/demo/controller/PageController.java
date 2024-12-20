@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.dto.PageRequestDto;
 import com.example.demo.dto.PageResponseDto;
 import com.example.demo.exceptions.GlobalExceptionHandler;
+import com.example.demo.exceptions.ValidationErrorResponse;
 import com.example.demo.service.PageService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -34,14 +40,34 @@ public class PageController {
     }
 
     @PutMapping("/{page_slug}")
-    public ResponseEntity<PageResponseDto> editPage(
+    public ResponseEntity<?> editPage(
                                         @PathVariable("blog_name") String blog,
                                         @PathVariable("page_slug") String page,
-                                        @RequestBody PageRequestDto pageRequest){
-        logger.info("Received reqest to update page '{}'' of blog: '{}'", page, blog);
+                                        @Valid @RequestBody PageRequestDto pageRequest,
+                                        BindingResult bindingResult) {
+
+        logger.info("Update page [page={}, blog={}", page, blog);
+
+        // DTO field validation
+        if (bindingResult.hasErrors())
+            return handleValidationErrors(bindingResult);
+
         PageResponseDto updatedPage = pageService.updatePage(blog, page, pageRequest);
-        logger.info("Successfully updated page '{}' of blog: '{}'", page, blog);
+        logger.info("Successfully updated page [page={}, blog={}", page, blog);
+
         return ResponseEntity.ok(updatedPage); // Return the response DTO back to the client
+    }
+
+    private ResponseEntity<ValidationErrorResponse> handleValidationErrors(BindingResult bindingResult) {
+
+        ValidationErrorResponse validationErrorResponse = new ValidationErrorResponse();
+
+        for (FieldError error : bindingResult.getFieldErrors()) {
+            System.out.println(error.getField() + ", " + error.getDefaultMessage());
+            validationErrorResponse.addError(error.getField(), error.getDefaultMessage());
+        }
+
+        return ResponseEntity.badRequest().body(validationErrorResponse);
     }
 
 }

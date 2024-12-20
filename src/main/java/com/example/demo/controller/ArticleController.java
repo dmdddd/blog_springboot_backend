@@ -20,12 +20,13 @@ import java.util.Map;
 
 import com.example.demo.dto.ArticleRequestDto;
 import com.example.demo.dto.ArticleResponseDto;
-import com.example.demo.dto.CommentRequestDto;
-import com.example.demo.dto.CommentResponseDto;
 import com.example.demo.exceptions.GlobalExceptionHandler;
-import com.example.demo.model.Article;
+import com.example.demo.exceptions.ValidationErrorResponse;
 import com.example.demo.service.ArticleService;
 
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -70,12 +71,17 @@ public class ArticleController {
     }
 
     @PostMapping
-    public ResponseEntity<ArticleResponseDto> createArticle(@RequestBody ArticleRequestDto articleRequest) {
-        logger.info("Received request to s new article: {}", articleRequest.getTitle());
+    public ResponseEntity<?> createArticle(@Valid @RequestBody ArticleRequestDto articleRequest, BindingResult bindingResult) {
+        logger.info("Creating article [slug={}, blog={}]", articleRequest.getName(), articleRequest.getBlog());
 
+        // DTO field validation
+        if (bindingResult.hasErrors())
+            return handleValidationErrors(bindingResult);
+            
         ArticleResponseDto newArticle = articleService.createArticle(articleRequest);
 
-        logger.info("Successfully added a new article with ID: {}", newArticle.getId());
+        logger.info("Successfully created article [slug={}, blog={}]", articleRequest.getName(), articleRequest.getBlog());
+
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
@@ -95,13 +101,38 @@ public class ArticleController {
     }
 
     @PutMapping("/{article_name}")
-    public ResponseEntity<ArticleResponseDto> editArticle(
-                                        @PathVariable("blog_name") String blog,
-                                        @PathVariable("article_name") String article,
-                                        @RequestBody ArticleRequestDto articleRequest){
-        logger.info("Received reqest to update article {}, blog:  {}", article, blog);
-        ArticleResponseDto updatedArticle = articleService.updateArticle(blog, article, articleRequest);
-        logger.info("Successfully updated article {}, blog:  {}", article, blog);
-        return ResponseEntity.ok(updatedArticle); // Return the response DTO back to the client
+    public ResponseEntity<?> editArticle(
+            @PathVariable("blog_name") String blog,
+            @PathVariable("article_name") String articleSlug,
+            @Valid @RequestBody ArticleRequestDto articleRequest, 
+            BindingResult bindingResult) {
+
+        logger.info("Updating article [slug={}, blog={}]", articleSlug, blog);
+
+        // DTO field validation
+        if (bindingResult.hasErrors())
+            return handleValidationErrors(bindingResult);
+
+        ArticleResponseDto updatedArticle = articleService.updateArticle(
+            blog, 
+            articleSlug, 
+            articleRequest);
+
+        logger.info("Successfully updated article [slug={}, blog={}]", articleSlug, blog);
+
+        return ResponseEntity.ok().body(updatedArticle); // Return the response DTO back to the client
+    }
+
+
+    private ResponseEntity<ValidationErrorResponse> handleValidationErrors(BindingResult bindingResult) {
+
+        ValidationErrorResponse validationErrorResponse = new ValidationErrorResponse();
+
+        for (FieldError error : bindingResult.getFieldErrors()) {
+            System.out.println(error.getField() + ", " + error.getDefaultMessage());
+            validationErrorResponse.addError(error.getField(), error.getDefaultMessage());
+        }
+
+        return ResponseEntity.badRequest().body(validationErrorResponse);
     }
 }

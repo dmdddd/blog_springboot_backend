@@ -114,10 +114,16 @@ public class CommentService {
         return commentConverter.toDto(comment, authenticationService.getCurrentUserEmail());
     }
 
-
     public void updatePhotoUrlForUser(String photoUrl) {
         String email = authenticationService.getCurrentUserEmail();
-        logger.debug("Updating photoUrl for comments by {} to {}", photoUrl, email);
-        commentRepository.updatePhotoUrlForEmail(email, photoUrl);
+        logger.info("Updating photoUrl for comments by {} to {}", email, photoUrl);
+        long updated = commentRepository.updatePhotoUrlForEmail(email, photoUrl);
+        logger.info("Successfully updated photoUrl for  {} comments by {} to {}", updated, email, photoUrl);
+    }
+
+    public void updateCommentsArticleName(String blog, String oldName, String newName) {
+        logger.info("Updating article name for comments, from {} to {}, blog: {}", oldName, newName, blog);
+        long updated = commentRepository.updateCommentsArticleName(blog, oldName, newName);
+        logger.info("Successfully updated article name for {} comments, from {} to {}, blog: {}", updated, oldName, newName, blog);
     }
 }
