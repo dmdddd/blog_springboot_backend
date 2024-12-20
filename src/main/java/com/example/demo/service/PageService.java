@@ -13,12 +13,10 @@ import org.springframework.stereotype.Service;
 import com.example.demo.converters.PageConverter;
 import com.example.demo.dto.PageRequestDto;
 import com.example.demo.dto.PageResponseDto;
-import com.example.demo.exceptions.CommentNotFoundException;
 import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.PageNotFoundException;
 import com.example.demo.exceptions.SlugAlreadyExistsException;
-import com.example.demo.model.Comment;
 import com.example.demo.model.Page;
 import com.example.demo.repository.PageRepository;
 
@@ -66,7 +64,7 @@ public class PageService {
             throw new InvalidRequestException("Both title and slug must be provided together.");
         }
 
-        if (requestDto.getTitle() != null && requestDto.getSlug() != null) {
+        if (!requestDto.getSlug().equals(page.getSlug())) { // Updating title and slug
             if (pageRepository.existsByBlogAndSlug(blog, requestDto.getSlug())) {
                 throw new SlugAlreadyExistsException("Slug '" + requestDto.getSlug() + "' already exists in blog '" + blog + "'.");
             }
