@@ -18,4 +18,13 @@
 
 
 Ideas:
+Pagination to blogs, articles and comments
 Blog page editing history - keep a history of edits so users can revert to previous versions if needed.
+Check: Context clean on logout
+Categories - add categories to articles and be able switch between categories in the blog
+Article status - some articles can be saved as drafts. status=[Draft, published, pending review, scheduled, archived, trashed (recycle bin before removing completely)]
+Article - thumbnail: A URL or path to a thumbnail image for the article.
+Article - views: A count of how many times the article has been viewed.
+Blog: followers, likes, thumbnail, status (active, inactive), categories, createdAt, updatedAt, author
+
+Create a custom annotation "MinLengthExcludingHtml" when adding or editing rich text
