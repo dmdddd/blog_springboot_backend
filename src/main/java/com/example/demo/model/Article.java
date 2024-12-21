@@ -37,6 +37,10 @@ public class Article {
     private Date createdAt;
     @Field("updatedAt")
     private Date updatedAt;
+    @Field("admins")
+    private List<String> blogAdminIds = new ArrayList<>();
+    @Field("editors")
+    private List<String> blogEditorIds = new ArrayList<>();
 
 
     @Override

@@ -27,9 +27,8 @@ public class Blog {
     private String description;
     @Field("CreatedOn")
     private Date createdOn;
-    @Field("admins")
-    private List<String> admins = new ArrayList<>();
-
+    @Field("users")
+    private List<BlogUser> users = new ArrayList<>();
 
     @Override
     public String toString() {
