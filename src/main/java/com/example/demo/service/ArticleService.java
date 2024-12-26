@@ -3,23 +3,29 @@ package com.example.demo.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.converters.ArticleConverter;
 import com.example.demo.dto.ArticleRequestDto;
 import com.example.demo.dto.ArticleResponseDto;
+import com.example.demo.dto.BlogResponseDto;
 import com.example.demo.exceptions.ArticleNotFoundException;
 import com.example.demo.exceptions.DuplicateArticleException;
 import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.InvalidSlugFormatException;
+import com.example.demo.exceptions.UnauthorizedException;
 import com.example.demo.model.Article;
+import com.example.demo.model.Blog;
 import com.example.demo.repository.ArticleRepository;
 import com.example.demo.validation.SlugValidator;
 
@@ -36,13 +42,15 @@ public class ArticleService {
     private final ArticleConverter articleConverter;
     private final AuthenticationService authenticationService;
     private final CommentService commentService;
+    private final BlogService blogService;
 
     // Constructor injection
-    public ArticleService(ArticleRepository articleRepository, ArticleConverter articleConverter, AuthenticationService authenticationService, CommentService commentService) {
+    public ArticleService(ArticleRepository articleRepository, ArticleConverter articleConverter, AuthenticationService authenticationService, CommentService commentService, BlogService blogService) {
         this.articleRepository = articleRepository;
         this.articleConverter = articleConverter;
         this.authenticationService = authenticationService;
         this.commentService = commentService;
+        this.blogService = blogService;
     }
 
     public List<ArticleResponseDto> getArticlesByBlog(String blog) {
@@ -121,44 +129,58 @@ public class ArticleService {
 
         if (!SlugValidator.isValidSlug(slug)) {
             throw new InvalidSlugFormatException("Invalid slug format for: " + slug);
-
         }
 
         return !articleRepository.existsByBlogAndName(blog, slug);
     }
 
     public ArticleResponseDto createArticle(ArticleRequestDto articleRequest) {
-        logger.debug("Checking if slug is valid for article {}", articleRequest.getName());
 
+        logger.debug("Checking permissions for {}", articleRequest.getBlog());
+        BlogResponseDto blog = blogService.getBlog(articleRequest.getBlog());
+        List<String> admins = blogService.getAdmins(blog.getUsers());
+        List<String> editors = blogService.getEditors(blog.getUsers());
+
+        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!admins.contains(userId) && !editors.contains(userId)) {
+            throw new UnauthorizedException("You don't have permission to add an article to blog: " + articleRequest.getBlog());
+        }
+
+        logger.debug("Checking if slug is valid for article {}", articleRequest.getName());
         if (!SlugValidator.isValidSlug(articleRequest.getName())) {
             throw new InvalidSlugFormatException("Invalid slug format for article: " + articleRequest.getName());
         }
 
         if (articleRepository.existsByBlogAndName(articleRequest.getBlog(), articleRequest.getName())) {
             logger.warn("Attempted to create an article with a duplicate slug: {}", articleRequest.getName());
-            throw new DuplicateArticleException("An article with the slug '" + articleRequest.getName() + "' already exists.");
+            throw new DuplicateArticleException("Article with the name '" + articleRequest.getName() + "' already exists.");
         }
-
+        
         String user = authenticationService.getCurrentUserName() != null ? authenticationService.getCurrentUserName() : authenticationService.getCurrentUserEmail();
         Article newArticle = new Article(null, articleRequest.getName(), articleRequest.getBlog(), articleRequest.getTitle(),
-            articleRequest.getContent(), 0, new ArrayList<String>(), user, new Date(), null);
+            articleRequest.getContent(), 0, new ArrayList<String>(), user, new Date(), null, admins, editors);
 
 
         logger.debug("Saving new article {}", newArticle);
 
         articleRepository.save(newArticle);
-        logger.info("Successfully saved article with ID: {} for blog: {}", newArticle.getId(), "");
+        logger.info("Successfully saved article with ID: {} for blog: {}", newArticle.getId(), newArticle.getBlog());
 
         return articleConverter.toDto(newArticle);
     }
 
-    public void deleteArticleByBlogAndSlug(String blog, String article) {
+    public void deleteArticleByBlogAndSlug(String blog, String articleName) {
 
-        if (!articleRepository.existsByBlogAndName(blog, article)) {
-            new ArticleNotFoundException("Article not found with name: " + article + ", blog: " + blog);
+         Article article = articleRepository.findByBlogAndName(blog, articleName)
+         .orElseThrow(() -> new ArticleNotFoundException("Article not found with name: " + articleName + ", blog: " + blog));
+
+        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!article.getBlogAdminIds().contains(userId) && !article.getBlogEditorIds().contains(userId)) {
+            throw new UnauthorizedException("You don't have permission to delete an article in blog: " + blog);
         }
-        articleRepository.deleteByBlogAndName(blog, article);
-        logger.info("Successfully deleted article {}, blog: {}", article, blog);
+
+        articleRepository.deleteByBlogAndName(blog, articleName);
+        logger.info("Successfully deleted article {}, blog: {}", articleName, blog);
     }
 
     @Transactional
@@ -170,6 +192,11 @@ public class ArticleService {
         }
 
         Article article = existingArticle.get();
+
+        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!article.getBlogAdminIds().contains(userId) && !article.getBlogEditorIds().contains(userId)) {
+            throw new UnauthorizedException("You don't have permission to edit an article in blog: " + articleRequest.getBlog());
+        }
 
         // Ensure both name (slug) and title are provided together
         if ((articleRequest.getName() != null && articleRequest.getTitle() == null) ||
