@@ -2,12 +2,14 @@ package com.example.demo.model;
 
 import java.util.Date;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
+@AllArgsConstructor // Generates a constructor with all fields
 @Data
 public class BlogUser {
 
-    public enum Role {
+    public enum BlogRole {
         ADMIN,
         EDITOR
     }
@@ -15,7 +17,7 @@ public class BlogUser {
     private String uid;      // Firebase UID
     private String email;
     private String name;
-    private Role role;
+    private BlogRole role;
     private Date addedAt;
 
 }

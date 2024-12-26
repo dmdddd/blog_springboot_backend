@@ -35,6 +35,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(UnauthorizedException ex) {
+        logger.warn("Unauthorized: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse("FORBIDDEN", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
     @ExceptionHandler(SlugAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleSlugAlreadyExistsException(SlugAlreadyExistsException ex) {
         logger.warn("Slug already exists: {}", ex.getMessage());
@@ -73,6 +80,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DuplicateArticleException.class)
     public ResponseEntity<ErrorResponse> DuplicateArticleException(DuplicateArticleException ex) {
         logger.warn("Article with this slug already exists: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse("CONFLICT", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(DuplicateBlogException.class)
+    public ResponseEntity<ErrorResponse> DuplicateBlogException(DuplicateBlogException ex) {
+        logger.warn("Blog with this slug already exists: {}", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse("CONFLICT", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }

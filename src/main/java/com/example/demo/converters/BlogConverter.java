@@ -25,7 +25,7 @@ public class BlogConverter {
             throw new IllegalArgumentException("Blog cannot be null");
         }
 
-        return new BlogResponseDto(blog.getId(), blog.getName(), blog.getTitle(), blog.getDescription(), blog.getCreatedOn(), blog.getAdmins());
+        return new BlogResponseDto(blog.getId(), blog.getName(), blog.getTitle(), blog.getDescription(), blog.getCreatedOn(), blog.getUsers());
     }
 
     /**

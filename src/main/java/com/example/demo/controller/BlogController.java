@@ -4,21 +4,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import com.example.demo.dto.BlogRequestDto;
 import com.example.demo.dto.BlogResponseDto;
 import com.example.demo.exceptions.GlobalExceptionHandler;
+import com.example.demo.exceptions.ValidationErrorResponse;
 import com.example.demo.service.BlogService;
 
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -40,8 +47,43 @@ public class BlogController {
     @GetMapping("/{blog_name}")
     public ResponseEntity<BlogResponseDto> getBlog(@PathVariable("blog_name") String blogName) {
 
+        logger.info("Rertieving blog: " + blogName);
         BlogResponseDto blog = blogService.getBlog(blogName);
+        logger.info("Successfully retrieved blog: " + blogName);
         return ResponseEntity.ok(blog); // 200 OK with the articles
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createBlog(@Valid @RequestBody BlogRequestDto blogRequest, BindingResult bindingResult) {
+
+        logger.info("Received request to create a new blog: {}", blogRequest.getTitle());
+
+        // DTO field validation
+        if (bindingResult.hasErrors())
+            return handleValidationErrors(bindingResult);
+
+        BlogResponseDto newBlog = blogService.createBlog(blogRequest);
+
+        logger.info("Successfully added a new blog with ID: {}", newBlog.getName());
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("/{id}")
+            .buildAndExpand(newBlog.getName())
+            .toUri();
+
+        return ResponseEntity.created(location).body(newBlog);
+    }
+
+    private ResponseEntity<ValidationErrorResponse> handleValidationErrors(BindingResult bindingResult) {
+
+        ValidationErrorResponse validationErrorResponse = new ValidationErrorResponse();
+
+        for (FieldError error : bindingResult.getFieldErrors()) {
+            System.out.println(error.getField() + ", " + error.getDefaultMessage());
+            validationErrorResponse.addError(error.getField(), error.getDefaultMessage());
+        }
+
+        return ResponseEntity.badRequest().body(validationErrorResponse);
     }
 
     // @GetMapping("/articles/{article_name}")
@@ -60,11 +102,11 @@ public class BlogController {
     //     return ResponseEntity.ok(downdatedArticle); // Return the updated article DTO with 200 OK
     // }
 
-    // @GetMapping("/checkSlug/{slug}")
-    // public ResponseEntity<Map<String, Boolean>> checkSlug(@PathVariable String slug) {
-    //     boolean isUnique = articleService.existsBySlug(slug);
-    //     return ResponseEntity.ok(Map.of("isUnique", isUnique));
-    // }
+    @GetMapping("/checkSlug/{slug}")
+    public ResponseEntity<Map<String, Boolean>> checkSlug(@PathVariable String slug) {
+        boolean isUnique = blogService.uniqueName(slug);
+        return ResponseEntity.ok(Map.of("isUnique", isUnique));
+    }
 
     // @PostMapping
     // public ResponseEntity<ArticleResponseDto> createArticle(@RequestBody ArticleRequestDto articleRequest) {
