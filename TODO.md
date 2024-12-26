@@ -15,7 +15,9 @@
     - [x] PUT  /api/comments/{comment_id}
 
 
-
+IMPORTANT:
+Deleting an article should delete comments
+Deleting a blog, should delete articles and comments
 
 Ideas:
 Pagination to blogs, articles and comments
@@ -28,3 +30,8 @@ Article - views: A count of how many times the article has been viewed.
 Blog: followers, likes, thumbnail, status (active, inactive), categories, createdAt, updatedAt, author
 
 Create a custom annotation "MinLengthExcludingHtml" when adding or editing rich text
+
+Prompt:
+Blog management application where users can create their own blogs, write articles and others can comment and upvote articles.
+Blogs have admins and editors, these can write and edit articles.
+Tech stack: react and spring boot, mongoDB database, firebase authentication
