@@ -6,7 +6,7 @@ This is a backend for the blog application, using Spring Boot.
 ### APIs  
 
 | Function | Method | Endpoint | Permissions |
-|---|---|---|
+|---|---|---|---|
 | Get blogs | ``GET`` | ``/api/blogs`` | Anyone |
 | Create blogs | ``POST`` | ``/api/blogs`` |  |
 | Check unique blog name | ``GET`` | ``/api/blogs/checkSlug/{slug}`` |  |
