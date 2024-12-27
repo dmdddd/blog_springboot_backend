@@ -137,7 +137,7 @@ public class ArticleService {
     public ArticleResponseDto createArticle(ArticleRequestDto articleRequest) {
 
         logger.debug("Checking permissions for {}", articleRequest.getBlog());
-        BlogResponseDto blog = blogService.getBlog(articleRequest.getBlog());
+        Blog blog = blogService.getBlog(articleRequest.getBlog());
         List<String> admins = blogService.getAdmins(blog.getUsers());
         List<String> editors = blogService.getEditors(blog.getUsers());
 

@@ -48,7 +48,7 @@ public class BlogController {
     public ResponseEntity<BlogResponseDto> getBlog(@PathVariable("blog_name") String blogName) {
 
         logger.info("Rertieving blog: " + blogName);
-        BlogResponseDto blog = blogService.getBlog(blogName);
+        BlogResponseDto blog = blogService.getBlogDto(blogName);
         logger.info("Successfully retrieved blog: " + blogName);
         return ResponseEntity.ok(blog); // 200 OK with the articles
     }

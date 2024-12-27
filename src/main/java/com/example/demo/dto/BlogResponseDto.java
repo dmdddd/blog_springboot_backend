@@ -1,10 +1,6 @@
 package com.example.demo.dto;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
-import com.example.demo.model.BlogUser;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +13,7 @@ public class BlogResponseDto {
     private String title;
     private String description;
     private Date createdOn;
-    private List<BlogUser> users = new ArrayList<>();
+    private boolean isAdmin;
+    private boolean isEditor;
 
 }

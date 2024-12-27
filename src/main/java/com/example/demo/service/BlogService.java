@@ -55,11 +55,14 @@ public class BlogService {
                 .collect(Collectors.toList());
     }
 
-    public BlogResponseDto getBlog(String blog){
-        Optional<Blog> optionalBlog = blogRepository.findByName(blog);
-        
-        return optionalBlog.map(blogConverter::toDto) // Convert Article to DTO if present
-                .orElseThrow(() -> new BlogNotFoundException("Blog not found with name: " + blog)); // Throw exception if empty
+    public Blog getBlog(String blog) {
+        return blogRepository.findByName(blog)
+            .orElseThrow(() -> new BlogNotFoundException("Blog not found with name: " + blog));
+    }
+
+    public BlogResponseDto getBlogDto(String blog){
+        Blog blogEntity = getBlog(blog);
+        return blogConverter.toDto(blogEntity);
     }
 
     public BlogResponseDto createBlog(BlogRequestDto blogRequest) {

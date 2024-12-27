@@ -21,5 +21,7 @@ public class ArticleResponseDto {
     private String author;
     private Date createdAt;
     private Date updatedAt;
+    private boolean isAdmin;
+    private boolean isEditor;
     
 }

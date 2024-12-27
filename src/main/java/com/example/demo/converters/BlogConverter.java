@@ -4,13 +4,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.dto.BlogResponseDto;
+import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.model.Blog;
+import com.example.demo.model.BlogUser.BlogRole;
 
 @Component
 public class BlogConverter {
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      * Converts an Blog entity to a DTO.
@@ -24,8 +30,14 @@ public class BlogConverter {
         if (blog == null) {
             throw new IllegalArgumentException("Blog cannot be null");
         }
+        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return new BlogResponseDto(blog.getId(), blog.getName(), blog.getTitle(), blog.getDescription(), blog.getCreatedOn(), blog.getUsers());
+        boolean isAdmin = blog.getUsers().stream()
+            .anyMatch(user -> user.getUid().equals(userId) && user.getRole() == BlogRole.ADMIN);
+        boolean isEditor = blog.getUsers().stream()
+            .anyMatch(user -> user.getUid().equals(userId) && user.getRole() == BlogRole.EDITOR);
+
+        return new BlogResponseDto(blog.getId(), blog.getName(), blog.getTitle(), blog.getDescription(), blog.getCreatedOn(), isAdmin, isEditor);
     }
 
     /**
