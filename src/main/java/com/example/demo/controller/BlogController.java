@@ -74,6 +74,12 @@ public class BlogController {
         return ResponseEntity.created(location).body(newBlog);
     }
 
+    @GetMapping("/checkSlug/{slug}")
+    public ResponseEntity<Map<String, Boolean>> checkSlug(@PathVariable String slug) {
+        boolean isUnique = blogService.uniqueName(slug);
+        return ResponseEntity.ok(Map.of("isUnique", isUnique));
+    }
+
     private ResponseEntity<ValidationErrorResponse> handleValidationErrors(BindingResult bindingResult) {
 
         ValidationErrorResponse validationErrorResponse = new ValidationErrorResponse();
@@ -101,12 +107,6 @@ public class BlogController {
     //     ArticleResponseDto downdatedArticle = articleService.voteOnArticle(articleName, voteType, userId);
     //     return ResponseEntity.ok(downdatedArticle); // Return the updated article DTO with 200 OK
     // }
-
-    @GetMapping("/checkSlug/{slug}")
-    public ResponseEntity<Map<String, Boolean>> checkSlug(@PathVariable String slug) {
-        boolean isUnique = blogService.uniqueName(slug);
-        return ResponseEntity.ok(Map.of("isUnique", isUnique));
-    }
 
     // @PostMapping
     // public ResponseEntity<ArticleResponseDto> createArticle(@RequestBody ArticleRequestDto articleRequest) {
