@@ -19,21 +19,33 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
-                    .authorizeHttpRequests(auth -> auth
-                            // Articles
-                            .requestMatchers(HttpMethod.POST, "/api/articles").authenticated() // Require authentication for POST
-                            .requestMatchers("/api/articles/*/vote").authenticated()        // Require authentication
-                            .requestMatchers("/api/articles/checkName/*").authenticated()   // Require authentication
-                            .requestMatchers("/api/articles/*").permitAll()                 // Open access
-                            // Comments
-                            .requestMatchers(HttpMethod.POST, "/api/articles/*/comments").authenticated() // Require authentication for POST
-                            .requestMatchers("/api/comments/*").authenticated()             // Require authentication
-                            .requestMatchers("/api/comments/updateIcon").authenticated()    // Require authentication
-                            // Fallback for any other requests
-                            .anyRequest().permitAll())
-                            
-                    .addFilterBefore(firebaseTokenFilter, UsernamePasswordAuthenticationFilter.class);
+            .authorizeHttpRequests(auth -> auth
+                // Blogs
+                .requestMatchers(HttpMethod.POST, "/api/blogs").authenticated()
+                .requestMatchers("/api/blogs/checkSlug/*").authenticated()
 
-            return http.build();
+                // Articles
+                .requestMatchers(HttpMethod.POST, "/api/blogs/*/articles").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/blogs/*/articles/*").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/blogs/*/articles/*").authenticated()
+                .requestMatchers("/api/blogs/*/articles/checkSlug/*").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/blogs/*/articles/*/vote").authenticated()
+
+                // Pages
+                .requestMatchers(HttpMethod.PUT, "/api/blogs/*/pages/*").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/blogs/*/pages/*").authenticated()
+
+                // Comments
+                .requestMatchers(HttpMethod.POST, "/api/blogs/*/articles/*/comments").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/comments/*").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/api/comments/*").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/comments/updateIcon").authenticated()
+
+                // Fallback for any other requests
+                .anyRequest().permitAll())
+                            
+            .addFilterBefore(firebaseTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 }
