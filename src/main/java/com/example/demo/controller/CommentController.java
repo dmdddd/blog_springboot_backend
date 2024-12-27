@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping
-// @RequestMapping("/api/comments/")
 public class CommentController {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
@@ -80,7 +79,7 @@ public class CommentController {
         return ResponseEntity.ok(updatedComment); // Return the response DTO back to the client
     }
 
-    @PostMapping("/updateIcon")
+    @PostMapping("/api/comments/updateIcon")
     public ResponseEntity<String> updatePhotoUrl(@RequestBody PhotoUrlUpdateRequestDto requestDto) {
 
         logger.info("Received reqest to update icon for comments of user");
