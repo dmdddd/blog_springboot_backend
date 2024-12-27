@@ -175,7 +175,7 @@ public class ArticleService {
          .orElseThrow(() -> new ArticleNotFoundException("Article not found with name: " + articleName + ", blog: " + blog));
 
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!article.getBlogAdminIds().contains(userId) && !article.getBlogEditorIds().contains(userId)) {
+        if (!article.getBlogAdminIds().contains(userId)) {
             throw new UnauthorizedException("You don't have permission to delete an article in blog: " + blog);
         }
 
