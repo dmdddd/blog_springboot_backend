@@ -10,4 +10,5 @@ public interface PageRepository extends MongoRepository<Page, String> {
     List<Page> findByBlog(String blog);
     Optional<Page> findByBlogAndSlug(String blog, String slug);
     boolean existsByBlogAndSlug(String blog, String slug);
+    void deleteByBlogAndSlug(String blog, String page);
 }

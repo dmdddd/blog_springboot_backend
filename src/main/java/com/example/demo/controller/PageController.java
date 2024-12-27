@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +19,7 @@ import com.example.demo.dto.PageResponseDto;
 import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.exceptions.ValidationErrorResponse;
 import com.example.demo.service.PageService;
+import com.google.rpc.context.AttributeContext.Response;
 
 import jakarta.validation.Valid;
 
@@ -56,6 +58,18 @@ public class PageController {
         logger.info("Successfully updated page [page={}, blog={}", page, blog);
 
         return ResponseEntity.ok(updatedPage); // Return the response DTO back to the client
+    }
+
+    @DeleteMapping("/{page_slug}")
+    public ResponseEntity<Void> deletePage(
+        @PathVariable("blog_name") String blog,
+        @PathVariable("page_slug") String page) {
+
+            logger.info("Deleting page [page={}, blog={}]", page, blog);
+            pageService.deletePageByBlogAndSlug(blog, page);
+            logger.info("Successfully deleted page [page={}, blog={}]", page, blog);
+            return ResponseEntity.noContent().build();
+
     }
 
     private ResponseEntity<ValidationErrorResponse> handleValidationErrors(BindingResult bindingResult) {

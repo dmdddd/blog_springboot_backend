@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.converters.PageConverter;
@@ -17,6 +18,8 @@ import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.exceptions.InvalidRequestException;
 import com.example.demo.exceptions.PageNotFoundException;
 import com.example.demo.exceptions.SlugAlreadyExistsException;
+import com.example.demo.exceptions.UnauthorizedException;
+import com.example.demo.model.Blog;
 import com.example.demo.model.Page;
 import com.example.demo.repository.PageRepository;
 
@@ -26,13 +29,16 @@ public class PageService {
     
     private final PageRepository pageRepository;
     private final PageConverter pageConverter;
+    private final BlogService blogService;
     private final AuthenticationService authenticationService;
 
     // Constructor injection
-    public PageService(PageRepository pageRepository, PageConverter pageConverter, AuthenticationService authenticationService) {
+    public PageService(PageRepository pageRepository, PageConverter pageConverter, AuthenticationService authenticationService, BlogService blogService) {
         this.pageRepository = pageRepository;
         this.pageConverter = pageConverter;
         this.authenticationService = authenticationService;
+        this.blogService = blogService;
+
     }
 
     public List<PageResponseDto> findPagesByBlog(String blog) {
@@ -50,10 +56,21 @@ public class PageService {
                 .collect(Collectors.toList());
     }
 
-    public PageResponseDto updatePage(String blog, String pageSlug, PageRequestDto requestDto){
-        Optional<Page> existingPage = pageRepository.findByBlogAndSlug(blog, pageSlug);
+    public PageResponseDto updatePage(String blogName, String pageSlug, PageRequestDto requestDto) {
+
+        logger.debug("Checking permissions for {}", blogName);
+        Blog blog = blogService.getBlog(blogName);
+        List<String> admins = blogService.getAdmins(blog.getUsers());
+        List<String> editors = blogService.getEditors(blog.getUsers());
+
+        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!admins.contains(userId) && !editors.contains(userId)) {
+            throw new UnauthorizedException("You don't have permission to edit pages in blog: " + blogName);
+        }
+
+        Optional<Page> existingPage = pageRepository.findByBlogAndSlug(blogName, pageSlug);
         if (existingPage.isEmpty()) {
-            throw new PageNotFoundException("Page " + pageSlug + " not found in blog " + blog);
+            throw new PageNotFoundException("Page " + pageSlug + " not found in blog " + blogName);
         }
 
         Page page = existingPage.get();
@@ -65,8 +82,8 @@ public class PageService {
         }
 
         if (!requestDto.getSlug().equals(page.getSlug())) { // Updating title and slug
-            if (pageRepository.existsByBlogAndSlug(blog, requestDto.getSlug())) {
-                throw new SlugAlreadyExistsException("Slug '" + requestDto.getSlug() + "' already exists in blog '" + blog + "'.");
+            if (pageRepository.existsByBlogAndSlug(blogName, requestDto.getSlug())) {
+                throw new SlugAlreadyExistsException("Slug '" + requestDto.getSlug() + "' already exists in blog '" + blogName + "'.");
             }
             page.setTitle(requestDto.getTitle());
             page.setSlug(requestDto.getSlug());
@@ -82,13 +99,21 @@ public class PageService {
         return pageConverter.toDto(page);
     }
 
-    public void deletePageByBlogAndSlug(String blog, String pageSlug) {
+    public void deletePageByBlogAndSlug(String blogName, String pageSlug) {
 
-        // if (!pageRepository.existsByBlogAndSlug(blog, pageSlug)) {
-        //     throw new PageNotFoundException("Page '"+pageSlug+"' for blog '{"+blog+"}' not found");
-        // }
-        // commentRepository.deleteById(id);
-        // logger.info("Successfully deleted comment with ID {}", id);
+        logger.debug("Checking permissions for {}", blogName);
+        Blog blog = blogService.getBlog(blogName);
+        List<String> admins = blogService.getAdmins(blog.getUsers());
+
+        String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!admins.contains(userId)) {
+            throw new UnauthorizedException("You don't have permission to delete pages in blog: " + blogName);
+        }
+
+        if (!pageRepository.existsByBlogAndSlug(blogName, pageSlug)) {
+            throw new PageNotFoundException("Page '"+pageSlug+"' for blog '"+blogName+"' not found");
+        }
+        pageRepository.deleteByBlogAndSlug(blogName, pageSlug);
     }
     
 
