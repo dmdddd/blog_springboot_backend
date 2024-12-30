@@ -66,7 +66,7 @@ public class ArticleController {
 
     @GetMapping("/checkSlug/{slug}")
     public ResponseEntity<Map<String, Boolean>> checkSlug(@PathVariable("blog_name") String blog, @PathVariable String slug) {
-        boolean isUnique = articleService.existsByBlogAndSlug(blog, slug);
+        boolean isUnique = !articleService.existsByBlogAndSlug(blog, slug);
         return ResponseEntity.ok(Map.of("isUnique", isUnique));
     }
 

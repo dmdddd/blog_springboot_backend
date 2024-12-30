@@ -127,7 +127,7 @@ public class ArticleService {
             throw new InvalidSlugFormatException("Invalid slug format for: " + slug);
         }
 
-        return !articleRepository.existsByBlogAndName(blog, slug);
+        return articleRepository.existsByBlogAndName(blog, slug);
     }
 
     public ArticleResponseDto addArticleToBlog(ArticleRequestDto articleRequest) {
@@ -233,5 +233,14 @@ public class ArticleService {
         articleRepository.save(article);
 
         return articleConverter.toDto(article);
+    }
+
+    public void updateArticleUpdatedAt(String blogId, String articleId) {
+        Optional<Article> articleOptional = articleRepository.findByBlogAndName(blogId, articleId);
+        
+        articleOptional.ifPresent(article -> {
+            article.setUpdatedAt(new Date());  // Update the updatedAt field with current date
+            articleRepository.save(article); 
+        });
     }
 }

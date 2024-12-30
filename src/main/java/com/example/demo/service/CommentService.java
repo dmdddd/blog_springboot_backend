@@ -26,14 +26,14 @@ public class CommentService {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private final CommentRepository commentRepository;
-    private final ArticleRepository articleRepository;
+    private final ArticleService articleService;
     private final CommentConverter commentConverter;
     private final AuthenticationService authenticationService;
 
     // Constructor injection
-    public CommentService(CommentRepository commentRepository, ArticleRepository articleRepository, CommentConverter commentConverter, AuthenticationService authenticationService) {
+    public CommentService(CommentRepository commentRepository, ArticleService articleService, CommentConverter commentConverter, AuthenticationService authenticationService) {
         this.commentRepository = commentRepository;
-        this.articleRepository = articleRepository;
+        this.articleService = articleService;
         this.commentConverter = commentConverter;
         this.authenticationService = authenticationService;
     }
@@ -68,7 +68,7 @@ public class CommentService {
 
         // Check if the article exists
         logger.debug("Checking if article with name {} exists in blog {}", article, blog);
-        if (!articleRepository.existsByBlogAndName(blog, article)) {
+        if (!articleService.existsByBlogAndSlug(blog, article)) {
             throw new ArticleNotFoundException("Article with name " + article + " not found in blog " + blog);
         }
 
@@ -86,6 +86,8 @@ public class CommentService {
 
         logger.debug("Saving new comment {}", newComment);
         commentRepository.save(newComment);
+
+        articleService.updateArticleUpdatedAt(blog, article);
 
         logger.info("Successfully saved comment with ID {} for article {}", newComment.getId(), article);
         return commentConverter.toDto(newComment, authenticationService.getCurrentUserEmail());
