@@ -128,7 +128,7 @@ public class BlogService {
     }
 
     public void updateBlogUpdatedAt(String blogId) {
-        Optional<Blog> blogOptional = blogRepository.findById(blogId);
+        Optional<Blog> blogOptional = blogRepository.findByName(blogId);
         
         // If the blog is present, update its updatedAt field
         blogOptional.ifPresent(blog -> {
