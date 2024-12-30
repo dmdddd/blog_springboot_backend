@@ -71,14 +71,14 @@ public class ArticleController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createArticle(@Valid @RequestBody ArticleRequestDto articleRequest, BindingResult bindingResult) {
+    public ResponseEntity<?> addArticleToBlog(@Valid @RequestBody ArticleRequestDto articleRequest, BindingResult bindingResult) {
         logger.info("Creating article [slug={}, blog={}]", articleRequest.getName(), articleRequest.getBlog());
 
         // DTO field validation
         if (bindingResult.hasErrors())
             return handleValidationErrors(bindingResult);
             
-        ArticleResponseDto newArticle = articleService.createArticle(articleRequest);
+        ArticleResponseDto newArticle = articleService.addArticleToBlog(articleRequest);
 
         logger.info("Successfully created article [slug={}, blog={}]", articleRequest.getName(), articleRequest.getBlog());
 

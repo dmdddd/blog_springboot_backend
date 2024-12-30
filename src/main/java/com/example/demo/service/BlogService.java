@@ -1,7 +1,6 @@
 package com.example.demo.service;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -9,12 +8,15 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.converters.BlogConverter;
 import com.example.demo.dto.BlogRequestDto;
 import com.example.demo.dto.BlogResponseDto;
+import com.example.demo.dto.PaginatedResponseDto;
 import com.example.demo.exceptions.BlogNotFoundException;
 import com.example.demo.exceptions.DuplicateBlogException;
 import com.example.demo.exceptions.GlobalExceptionHandler;
@@ -32,27 +34,35 @@ public class BlogService {
     private final BlogRepository blogRepository;
     private final BlogConverter blogConverter;
     private final AuthenticationService authenticationService;
+    private final PaginationService paginationService;
 
     // Constructor injection
-    public BlogService(BlogRepository blogRepository, BlogConverter blogConverter, AuthenticationService authenticationService) {
+    public BlogService(BlogRepository blogRepository, BlogConverter blogConverter, AuthenticationService authenticationService, PaginationService paginationService) {
         this.blogRepository = blogRepository;
         this.blogConverter = blogConverter;
         this.authenticationService = authenticationService;
+        this.paginationService = paginationService;
     }
 
-    public List<BlogResponseDto> getAllBlogs() {
-        
-        List<Blog> blogs = blogRepository.findAll();
+    public PaginatedResponseDto<BlogResponseDto> getBlogs(int page, int size, String sortBy, String sortDir, String category, String search) {
 
-        // Return an empty list if no articles are found
-        if (blogs.isEmpty()) {
-            return Collections.emptyList();
+        Pageable pageable = paginationService.createPageable(page, size, sortBy, sortDir);
+
+        // Create a Page of Blog entities with filtering
+        Page<Blog> blogPage;
+        // if (category != null && !category.isEmpty() && search != null && !search.isEmpty()) {
+        //     blogPage = blogRepository.findByCategoryAndTitleContaining(category, search, pageable);
+        // } else if (category != null && !category.isEmpty()) {
+        //     blogPage = blogRepository.findByCategory(category, pageable);
+        // } else 
+        if (search != null && !search.isEmpty()) {
+            blogPage = blogRepository.findByTitleContaining(search, pageable);
+        } else {
+            blogPage = blogRepository.findAll(pageable);
         }
 
-        // Convert the list of articles to a list of DTOs
-        return blogs.stream()
-                .map(blogConverter::toDto)
-                .collect(Collectors.toList());
+        String baseUrl = "/api/blogs"; // Define the base URL for this service
+        return paginationService.buildPaginationResponse(blogPage, blogConverter::toDto, baseUrl);
     }
 
     public Blog getBlog(String blog) {
@@ -79,7 +89,7 @@ public class BlogService {
 
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         BlogUser admin = new BlogUser(userId, authenticationService.getCurrentUserEmail(), authenticationService.getCurrentUserName(), BlogRole.ADMIN, new Date());
-        Blog newBlog = new Blog(null, blogRequest.getName(), blogRequest.getTitle(), blogRequest.getDescription(), new Date(), Arrays.asList(admin));
+        Blog newBlog = new Blog(null, blogRequest.getName(), blogRequest.getTitle(), blogRequest.getDescription(), new Date(), new Date(), Arrays.asList(admin));
 
         logger.debug("Saving new blog {}", newBlog);
 
@@ -115,5 +125,15 @@ public class BlogService {
             .collect(Collectors.toList());
 
         return editors;
+    }
+
+    public void updateBlogUpdatedAt(String blogId) {
+        Optional<Blog> blogOptional = blogRepository.findById(blogId);
+        
+        // If the blog is present, update its updatedAt field
+        blogOptional.ifPresent(blog -> {
+            blog.setUpdatedAt(new Date());  // Update the updatedAt field with current date
+            blogRepository.save(blog);      // Save the updated blog
+        });
     }
 }

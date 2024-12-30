@@ -3,21 +3,18 @@ package com.example.demo.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.converters.ArticleConverter;
 import com.example.demo.dto.ArticleRequestDto;
 import com.example.demo.dto.ArticleResponseDto;
-import com.example.demo.dto.BlogResponseDto;
 import com.example.demo.exceptions.ArticleNotFoundException;
 import com.example.demo.exceptions.DuplicateArticleException;
 import com.example.demo.exceptions.GlobalExceptionHandler;
@@ -30,7 +27,6 @@ import com.example.demo.repository.ArticleRepository;
 import com.example.demo.validation.SlugValidator;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 
 
 @Service
@@ -134,7 +130,7 @@ public class ArticleService {
         return !articleRepository.existsByBlogAndName(blog, slug);
     }
 
-    public ArticleResponseDto createArticle(ArticleRequestDto articleRequest) {
+    public ArticleResponseDto addArticleToBlog(ArticleRequestDto articleRequest) {
 
         logger.debug("Checking permissions for {}", articleRequest.getBlog());
         Blog blog = blogService.getBlog(articleRequest.getBlog());
@@ -158,12 +154,15 @@ public class ArticleService {
         
         String user = authenticationService.getCurrentUserName() != null ? authenticationService.getCurrentUserName() : authenticationService.getCurrentUserEmail();
         Article newArticle = new Article(null, articleRequest.getName(), articleRequest.getBlog(), articleRequest.getTitle(),
-            articleRequest.getContent(), 0, new ArrayList<String>(), user, new Date(), null, admins, editors);
+            articleRequest.getContent(), 0, new ArrayList<String>(), user, new Date(), new Date(), admins, editors);
 
 
         logger.debug("Saving new article {}", newArticle);
 
         articleRepository.save(newArticle);
+
+        blogService.updateBlogUpdatedAt(blog.getName());
+
         logger.info("Successfully saved article with ID: {} for blog: {}", newArticle.getId(), newArticle.getBlog());
 
         return articleConverter.toDto(newArticle);

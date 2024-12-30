@@ -25,8 +25,10 @@ public class Blog {
     private String title;
     @Field("description")
     private String description;
-    @Field("CreatedOn")
-    private Date createdOn;
+    @Field("createdAt")
+    private Date createdAt;
+    @Field("updatedAt")
+    private Date updatedAt;
     @Field("users")
     private List<BlogUser> users = new ArrayList<>();
 
