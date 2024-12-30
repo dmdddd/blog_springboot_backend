@@ -9,23 +9,24 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 
 import com.example.demo.dto.BlogRequestDto;
 import com.example.demo.dto.BlogResponseDto;
+import com.example.demo.dto.PaginatedResponseDto;
 import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.exceptions.ValidationErrorResponse;
 import com.example.demo.service.BlogService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 
 
 @RestController
@@ -38,9 +39,15 @@ public class BlogController {
     private BlogService blogService;
 
     @GetMapping
-    public ResponseEntity<List<BlogResponseDto>> getAllBlogs() {
+    public ResponseEntity<PaginatedResponseDto<BlogResponseDto>> getBlogs(
+            @RequestParam(value = "page", defaultValue = "1") @Min(1) int page,
+            @RequestParam(value = "size", defaultValue = "10") @Min(1) int size,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "sortDir", defaultValue = "desc") String sortDir,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "search", required = false) String search) {
 
-        List<BlogResponseDto> blogs = blogService.getAllBlogs();
+        PaginatedResponseDto<BlogResponseDto> blogs = blogService.getBlogs(page - 1, size, sortBy, sortDir, category, search);
         return ResponseEntity.ok(blogs); // 200 OK with the articles
     }
 

@@ -68,9 +68,9 @@ For detailed documentation, see [API Details](API_DETAILS.md).
 
 ### Blog Management
 - `POST /api/blogs` - Create a new blog (Admin only)
-- `GET /api/blogs` - Get all blogs
+- `GET /api/blogs` - Get all blogs - supports pagination (query query parameters: page, size)
 - `GET /api/blogs/{id}` - Get blog details
-- `GET /api/blogs/checkSlug/{slug}` - Check if blog name is unique
+- `GET /api/blogs/checkSlug/{slug}` - Check if blog name is unique (logged users only)
 <!-- - `PUT /api/blogs/{id}` - Update a blog (Admin only) -->
 <!-- - `DELETE /api/blogs/{id}` - Delete a blog (Admin only) -->
 
@@ -80,18 +80,20 @@ For detailed documentation, see [API Details](API_DETAILS.md).
 - `GET /api/blogs/{blogId}/articles/{id}` - Get article details
 - `PUT /api/blogs/{blogId}/articles/{id}` - Edit an article (Admin/Editor)
 - `DELETE /api/blogs/{blogId}/articles/{id}` - Delete an article (Admin only)
-- `GET /api/blogs/{blogId}/articles/checkSlug/{slug}` - Check if article name is unique in a blog
+- `GET /api/blogs/{blogId}/articles/checkSlug/{slug}` - Check if article name is unique in a blog (logged users only)
+- `PUT /api/blogs/{blogId}/articles/{articleId}/vote?type=[up/down]`: Vote article (logged users only)
 
 ### Pages
+- `GET /api/blogs/{blogId}/pages` - Get all pages for a blog
 - `PUT /api/blogs/{blogId}/pages/{id}` - Edit a page (Admin/Editor)
+- `DELETE /api/blogs/{blogId}/pages/{id}` - Delete a page (Admin)
 
-### Comments and Upvotes
-- `POST /api/blogs/{blogId}/articles/{articleId}/comments`: Add a comment to an article
+### Comments
+- `POST /api/blogs/{blogId}/articles/{articleId}/comments`: Add a comment to an article (logged users only)
 - `GET /api/blogs/{blogId}/articles/{articleId}/comments`: Get all comments for a specific article
-- `PUT /api/comments/{id}`: Edit a specific comment
-- `DELETE /api/comments/{id}`: Delete a specific comment
-- `POST /api/comments/updateIcon`: Update photo URL on all comments of the user
-- `PUT /api/blogs/{blogId}/articles/{articleId}/vote?type=[up/down]`: Vote article
+- `PUT /api/comments/{id}`: Edit a specific comment (logged users only)
+- `DELETE /api/comments/{id}`: Delete a specific comment (logged users only)
+- `POST /api/comments/updateIcon`: Update photo URL on all comments of the user (logged users only)
 
 ---
 

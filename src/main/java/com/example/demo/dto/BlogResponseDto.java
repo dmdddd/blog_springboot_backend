@@ -15,5 +15,4 @@ public class BlogResponseDto {
     private Date createdOn;
     private boolean isAdmin;
     private boolean isEditor;
-
 }
