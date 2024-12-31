@@ -12,7 +12,8 @@ public class BlogResponseDto {
     private String name;
     private String title;
     private String description;
-    private Date createdOn;
+    private Date createdAt;
+    private Date updatedAt;
     private boolean isAdmin;
     private boolean isEditor;
 }
