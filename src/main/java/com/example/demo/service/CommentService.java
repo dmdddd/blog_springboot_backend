@@ -17,7 +17,6 @@ import com.example.demo.exceptions.ArticleNotFoundException;
 import com.example.demo.exceptions.CommentNotFoundException;
 import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.model.Comment;
-import com.example.demo.repository.ArticleRepository;
 import com.example.demo.repository.CommentRepository;
 
 @Service
@@ -26,14 +25,14 @@ public class CommentService {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private final CommentRepository commentRepository;
-    private final ArticleService articleService;
+    private final ArticleCommentService articleCommentService;
     private final CommentConverter commentConverter;
     private final AuthenticationService authenticationService;
 
     // Constructor injection
-    public CommentService(CommentRepository commentRepository, ArticleService articleService, CommentConverter commentConverter, AuthenticationService authenticationService) {
+    public CommentService(CommentRepository commentRepository, ArticleCommentService articleCommentService, CommentConverter commentConverter, AuthenticationService authenticationService) {
         this.commentRepository = commentRepository;
-        this.articleService = articleService;
+        this.articleCommentService = articleCommentService;
         this.commentConverter = commentConverter;
         this.authenticationService = authenticationService;
     }
@@ -68,7 +67,7 @@ public class CommentService {
 
         // Check if the article exists
         logger.debug("Checking if article with name {} exists in blog {}", article, blog);
-        if (!articleService.existsByBlogAndSlug(blog, article)) {
+        if (!articleCommentService.articleExists(blog, article)) {
             throw new ArticleNotFoundException("Article with name " + article + " not found in blog " + blog);
         }
 
@@ -81,13 +80,12 @@ public class CommentService {
             article,
             authenticationService.getCurrentUserEmail(),
             authenticationService.getCurrentUserPhotoUrl(),
-            new Date() // Current timestamp
+            new Date(),
+            new Date()
         );
 
         logger.debug("Saving new comment {}", newComment);
         commentRepository.save(newComment);
-
-        articleService.updateArticleUpdatedAt(blog, article);
 
         logger.info("Successfully saved comment with ID {} for article {}", newComment.getId(), article);
         return commentConverter.toDto(newComment, authenticationService.getCurrentUserEmail());
@@ -111,6 +109,7 @@ public class CommentService {
 
         Comment comment = existingComment.get();
         comment.setText(text);
+        comment.setUpdatedAt(new Date());
         commentRepository.save(comment);
 
         return commentConverter.toDto(comment, authenticationService.getCurrentUserEmail());
@@ -121,11 +120,5 @@ public class CommentService {
         logger.info("Updating photoUrl for comments by {} to {}", email, photoUrl);
         long updated = commentRepository.updatePhotoUrlForEmail(email, photoUrl);
         logger.info("Successfully updated photoUrl for  {} comments by {} to {}", updated, email, photoUrl);
-    }
-
-    public void updateCommentsArticleName(String blog, String oldName, String newName) {
-        logger.info("Updating article name for comments, from {} to {}, blog: {}", oldName, newName, blog);
-        long updated = commentRepository.updateCommentsArticleName(blog, oldName, newName);
-        logger.info("Successfully updated article name for {} comments, from {} to {}, blog: {}", updated, oldName, newName, blog);
     }
 }

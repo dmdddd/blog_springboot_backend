@@ -15,7 +15,8 @@ public class CommentResponseDto {
     private final String articleName;
     private final String userEmail;
     private final String userIcon;
-    private final Date createdOn;
+    private final Date createdAt;
+    private final Date updatedAt;
     // DTO only fields
     private final boolean canDelete;
 }

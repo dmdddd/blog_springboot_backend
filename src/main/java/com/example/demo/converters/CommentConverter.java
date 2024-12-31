@@ -25,7 +25,8 @@ public class CommentConverter {
             comment.getArticleName(), 
             comment.getUserEmail(), 
             comment.getUserIcon(), 
-            comment.getCreatedOn(), 
+            comment.getCreatedAt(), 
+            comment.getUpdatedAt(),
             canUserDeleteComment(comment, email)
         );
     }

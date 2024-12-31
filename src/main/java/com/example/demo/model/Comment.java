@@ -27,8 +27,10 @@ public class Comment {
     private String userEmail;
     @Field("userIcon")
     private String userIcon;
-    @Field("createdOn")
-    private Date createdOn;
+    @Field("createdAt")
+    private Date createdAt;
+    @Field("updatedAt")
+    private Date updatedAt;
 
     @Override
     public String toString() {
@@ -37,7 +39,8 @@ public class Comment {
                 ", article='" + articleName + '\'' +
                 ", text='" + text + '\'' +
                 ", userEmail='" + userEmail + '\'' +
-                ", createdOn=" + createdOn +
+                ", createdAt='" + createdAt + '\'' +
+                ", updatedAt=" + updatedAt +
                 '}';
     }
 }

@@ -37,15 +37,15 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final ArticleConverter articleConverter;
     private final AuthenticationService authenticationService;
-    private final CommentService commentService;
+    private final ArticleCommentService articleCommentService;
     private final BlogService blogService;
 
     // Constructor injection
-    public ArticleService(ArticleRepository articleRepository, ArticleConverter articleConverter, AuthenticationService authenticationService, CommentService commentService, BlogService blogService) {
+    public ArticleService(ArticleRepository articleRepository, ArticleConverter articleConverter, AuthenticationService authenticationService, ArticleCommentService articleCommentService, BlogService blogService) {
         this.articleRepository = articleRepository;
         this.articleConverter = articleConverter;
         this.authenticationService = authenticationService;
-        this.commentService = commentService;
+        this.articleCommentService = articleCommentService;
         this.blogService = blogService;
     }
 
@@ -121,15 +121,7 @@ public class ArticleService {
         return articleConverter.toDto(updatedArticle);
     }
 
-    public boolean existsByBlogAndSlug(String blog, String slug) {
-
-        if (!SlugValidator.isValidSlug(slug)) {
-            throw new InvalidSlugFormatException("Invalid slug format for: " + slug);
-        }
-
-        return articleRepository.existsByBlogAndName(blog, slug);
-    }
-
+    @Transactional
     public ArticleResponseDto addArticleToBlog(ArticleRequestDto articleRequest) {
 
         logger.debug("Checking permissions for {}", articleRequest.getBlog());
@@ -216,7 +208,7 @@ public class ArticleService {
             }
 
             // Update the comments with the new slug
-            commentService.updateCommentsArticleName(blog, previousArticleSlug, newArtcileSlug);
+            articleCommentService.updateCommentsArticleName(blog, previousArticleSlug, newArtcileSlug);
 
             // Update the article slug and title
             article.setName(newArtcileSlug);
@@ -242,5 +234,13 @@ public class ArticleService {
             article.setUpdatedAt(new Date());  // Update the updatedAt field with current date
             articleRepository.save(article); 
         });
+    }
+
+    public boolean articleExists(String blog, String slug) {
+        if (!SlugValidator.isValidSlug(slug)) {
+            throw new InvalidSlugFormatException("Invalid slug format for: " + slug);
+        }
+
+        return articleRepository.existsByBlogAndName(blog, slug);
     }
 }
