@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.converters.ArticleConverter;
 import com.example.demo.dto.ArticleRequestDto;
 import com.example.demo.dto.ArticleResponseDto;
+import com.example.demo.events.ArticleDeletedEvent;
 import com.example.demo.exceptions.ArticleNotFoundException;
 import com.example.demo.exceptions.DuplicateArticleException;
 import com.example.demo.exceptions.GlobalExceptionHandler;
@@ -39,14 +41,16 @@ public class ArticleService {
     private final AuthenticationService authenticationService;
     private final ArticleCommentService articleCommentService;
     private final BlogService blogService;
+    private final ApplicationEventPublisher eventPublisher;
 
     // Constructor injection
-    public ArticleService(ArticleRepository articleRepository, ArticleConverter articleConverter, AuthenticationService authenticationService, ArticleCommentService articleCommentService, BlogService blogService) {
+    public ArticleService(ArticleRepository articleRepository, ArticleConverter articleConverter, AuthenticationService authenticationService, ArticleCommentService articleCommentService, BlogService blogService, ApplicationEventPublisher eventPublisher) {
         this.articleRepository = articleRepository;
         this.articleConverter = articleConverter;
         this.authenticationService = authenticationService;
         this.articleCommentService = articleCommentService;
         this.blogService = blogService;
+        this.eventPublisher = eventPublisher;
     }
 
     public List<ArticleResponseDto> getArticlesByBlog(String blog) {
@@ -160,7 +164,7 @@ public class ArticleService {
         return articleConverter.toDto(newArticle);
     }
 
-    public void deleteArticleByBlogAndSlug(String blog, String articleName) {
+    public void deleteArticle(String blog, String articleName) {
 
          Article article = articleRepository.findByBlogAndName(blog, articleName)
          .orElseThrow(() -> new ArticleNotFoundException("Article not found with name: " + articleName + ", blog: " + blog));
@@ -172,6 +176,8 @@ public class ArticleService {
 
         articleRepository.deleteByBlogAndName(blog, articleName);
         logger.info("Successfully deleted article {}, blog: {}", articleName, blog);
+
+        eventPublisher.publishEvent(new ArticleDeletedEvent(blog, articleName));
     }
 
     @Transactional

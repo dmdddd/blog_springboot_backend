@@ -36,4 +36,10 @@ public class ArticleCommentService {
         long updated = commentRepository.updateCommentsArticleName(blog, oldName, newName);
         logger.info("Successfully updated article name for {} comments, from {} to {}, blog: {}", updated, oldName, newName, blog);
     }
+
+    public void deleteCommentsForArticle(String blog, String article) {
+        logger.info("Starting comment deletion for blog: '{}' and article: '{}'", blog, article);
+        commentRepository.deleteByBlogAndArticleName(blog, article);
+        logger.info("Successfully deleted comments for blog: '{}' and article: '{}'", blog, article);
+    }
 }

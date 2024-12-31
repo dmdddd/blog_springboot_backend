@@ -94,7 +94,7 @@ public class ArticleController {
     @DeleteMapping("/{article_name}")
     public ResponseEntity<Void> deleteArticle(@PathVariable("blog_name") String blog, @PathVariable("article_name") String article) {
         logger.info("Received request to delete article: {}, blog: {}", article, blog);
-        articleService.deleteArticleByBlogAndSlug(blog, article);
+        articleService.deleteArticle(blog, article);
         logger.info("Successfully deleted article: {}, blog: {}", article, blog);
 
         return ResponseEntity.noContent().build();
