@@ -63,8 +63,15 @@ Ensure the following software is installed on your machine:
    The API will be available at `http://localhost:8080`.
    
 ---
+
+## Design Decisions
+
+For detailed explanations of important design decisions, such as handling of `updatedAt` fields for various entities, please refer to the [Design Decisions Wiki](./docs/DesignDecisions.md).
+
+---
+
 ## API Endpoints (Quick Reference)
-For detailed documentation, see [API Details](API_DETAILS.md).
+For detailed documentation, see [API Details](./docs/API_DETAILS.md).
 
 ### Blog Management
 - `POST /api/blogs` - Create a new blog (Admin only)

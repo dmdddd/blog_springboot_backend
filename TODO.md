@@ -16,8 +16,9 @@
 
 
 IMPORTANT:
-Deleting an article should delete comments
-Deleting a blog, should delete articles and comments
+- Deleting an article should delete comments
+- Bug
+- Pagination
 
 Ideas:
 Pagination to blogs, articles and comments
@@ -32,6 +33,6 @@ Blog: followers, likes, thumbnail, status (active, inactive), categories, create
 Create a custom annotation "MinLengthExcludingHtml" when adding or editing rich text
 
 Prompt:
-Blog management application where users can create their own blogs, write articles and others can comment and upvote articles.
-Blogs have admins and editors, these can write and edit articles.
-Tech stack: react and spring boot, mongoDB database, firebase authentication
+Blog management platform where users can create their own blogs.
+When a blog is created admins can add pages like about or FAQ, admins and editors can write articles and other signed in users can comment and upvote articles.
+Tech stack: react and spring boot using Gradle, mongoDB database(collections: blogs, pages, articles, comments), firebase authentication
