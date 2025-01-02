@@ -60,22 +60,30 @@ public class CommentController {
         return ResponseEntity.created(location).body(responseDTO);
     }
 
-    @DeleteMapping("/api/comments/{comment_id}")
-    public ResponseEntity<Void> deleteCommentById(@PathVariable("comment_id") String commentId) {
+    @DeleteMapping("/api/blogs/{blog_name}/articles/{article_name}/comments/{comment_id}")
+    public ResponseEntity<Void> deleteCommentById(
+            @PathVariable("blog_name") String blog, 
+            @PathVariable("article_name") String article,
+            @PathVariable("comment_id") String commentId) {
 
-        logger.info("Received request to delete comment id {}", commentId);
-        commentService.deleteCommentById(commentId);
-        logger.info("Successfully deleted comment id {}", commentId);
+        logger.info("Received request to delete comment [id={} blog={} article={}]", commentId, blog, article);
+        commentService.deleteComment(blog, article, commentId);
+        logger.info("Successfully deleted comment [id={} blog={} article={}]", commentId, blog, article);
+
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/api/comments/{comment_id}")
+    @PutMapping("/api/blogs/{blog_name}/articles/{article_name}/comments/{comment_id}")
     public ResponseEntity<CommentResponseDto> editComment(
-                                        @PathVariable("comment_id") String id,
-                                        @RequestBody CommentRequestDto commentRequest){
-        logger.info("Received reqest to update comment id {}", id);
-        CommentResponseDto updatedComment = commentService.updateCommentText(id, commentRequest.getText());
-        logger.info("Successfully updated comment id {}", id);
+            @PathVariable("blog_name") String blog, 
+            @PathVariable("article_name") String article,
+            @PathVariable("comment_id") String commentId,
+            @RequestBody CommentRequestDto commentRequest){
+
+        logger.info("Received request to update comment [id={} blog={} article={}]", commentId, blog, article);
+        CommentResponseDto updatedComment = commentService.updateCommentText(blog, article, commentId, commentRequest.getText());
+        logger.info("Successfully updated comment [id={} blog={} article={}]", commentId, blog, article);
+
         return ResponseEntity.ok(updatedComment); // Return the response DTO back to the client
     }
 

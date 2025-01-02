@@ -98,8 +98,8 @@ For detailed documentation, see [API Details](./docs/API_DETAILS.md).
 ### Comments
 - `POST /api/blogs/{blogId}/articles/{articleId}/comments`: Add a comment to an article (logged users only)
 - `GET /api/blogs/{blogId}/articles/{articleId}/comments`: Get all comments for a specific article
-- `PUT /api/comments/{id}`: Edit a specific comment (logged users only)
-- `DELETE /api/comments/{id}`: Delete a specific comment (logged users only)
+- `PUT /api/blogs/{blogId}/articles/{articleId}/comments/{id}`: Edit a specific comment (logged users only)
+- `DELETE /api/blogs/{blogId}/articles/{articleId}/comments/{id}`: Delete a specific comment (logged users only)
 - `POST /api/comments/updateIcon`: Update photo URL on all comments of the user (logged users only)
 
 ---

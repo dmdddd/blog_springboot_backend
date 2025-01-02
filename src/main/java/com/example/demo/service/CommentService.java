@@ -19,6 +19,8 @@ import com.example.demo.exceptions.GlobalExceptionHandler;
 import com.example.demo.model.Comment;
 import com.example.demo.repository.CommentRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class CommentService {
 
@@ -28,13 +30,15 @@ public class CommentService {
     private final ArticleCommentService articleCommentService;
     private final CommentConverter commentConverter;
     private final AuthenticationService authenticationService;
+    private final CommentCountUpdateService commentCountUpdateService;
 
     // Constructor injection
-    public CommentService(CommentRepository commentRepository, ArticleCommentService articleCommentService, CommentConverter commentConverter, AuthenticationService authenticationService) {
+    public CommentService(CommentRepository commentRepository, ArticleCommentService articleCommentService, CommentConverter commentConverter, AuthenticationService authenticationService, CommentCountUpdateService commentCountUpdateService) {
         this.commentRepository = commentRepository;
         this.articleCommentService = articleCommentService;
         this.commentConverter = commentConverter;
         this.authenticationService = authenticationService;
+        this.commentCountUpdateService = commentCountUpdateService;
     }
 
     public List<CommentResponseDto> getCommentsByBlogAndArticle(String blog, String articleName) {
@@ -63,6 +67,7 @@ public class CommentService {
 
     }
 
+    @Transactional
     public CommentResponseDto createComment(CommentRequestDto commentRequest, String blog, String article) {
 
         // Check if the article exists
@@ -88,19 +93,24 @@ public class CommentService {
         commentRepository.save(newComment);
 
         logger.info("Successfully saved comment with ID {} for article {}", newComment.getId(), article);
+
+        commentCountUpdateService.incrementCommentCount(blog, article, 1);
+
         return commentConverter.toDto(newComment, authenticationService.getCurrentUserEmail());
     }
 
-    public void deleteCommentById(String id) {
+    @Transactional
+    public void deleteComment(String blog, String article, String id) {
 
         if (!commentRepository.existsById(id)) {
             throw new CommentNotFoundException("Comment with ID " + id + " not found");
         }
         commentRepository.deleteById(id);
+        commentCountUpdateService.decrementCommentCount(blog, article, 1);
         logger.info("Successfully deleted comment with ID {}", id);
     }
 
-    public CommentResponseDto updateCommentText(String id, String text) {
+    public CommentResponseDto updateCommentText(String blog, String article, String id, String text) {
 
         Optional<Comment> existingComment = commentRepository.findById(id);
         if (existingComment.isEmpty()) {
