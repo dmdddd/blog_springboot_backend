@@ -45,6 +45,9 @@ public class Article {
     @Field("upvoteIds")
     private List<String> upvoteIds = new ArrayList<>();
 
+    @Field("commentCount")
+    private int commentCount = 0;
+
     @Field("author")
     private String author;
 

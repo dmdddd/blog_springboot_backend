@@ -150,7 +150,7 @@ public class ArticleService {
         
         String user = authenticationService.getCurrentUserName() != null ? authenticationService.getCurrentUserName() : authenticationService.getCurrentUserEmail();
         Article newArticle = new Article(null, articleRequest.getName(), articleRequest.getBlog(), articleRequest.getTitle(),
-            articleRequest.getContent(), 0, new ArrayList<String>(), user, new Date(), new Date(), admins, editors);
+            articleRequest.getContent(), 0, new ArrayList<String>(), 0, user, new Date(), new Date(), admins, editors);
 
 
         logger.debug("Saving new article {}", newArticle);
@@ -182,6 +182,8 @@ public class ArticleService {
 
     @Transactional
     public ArticleResponseDto updateArticle(String blog, String articleSlug, ArticleRequestDto articleRequest) {
+
+        logger.info("Updating article [blog={}, article={}]", blog, articleSlug);
 
         Optional<Article> existingArticle = articleRepository.findByBlogAndName(blog, articleSlug);
         if (existingArticle.isEmpty()) {
@@ -227,8 +229,10 @@ public class ArticleService {
 
         article.setUpdatedAt(new Date()); 
 
-        // Save the updated article
         articleRepository.save(article);
+        blogService.updateBlogUpdatedAt(blog);
+
+        logger.info("Successfully updated article [blog={}, article={}]", blog, article);
 
         return articleConverter.toDto(article);
     }
