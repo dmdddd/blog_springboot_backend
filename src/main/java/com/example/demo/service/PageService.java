@@ -96,6 +96,8 @@ public class PageService {
         page.setUpdatedAt(new Date());
         pageRepository.save(page);
 
+        blogService.updateBlogUpdatedAt(blogName);
+
         return pageConverter.toDto(page);
     }
 
