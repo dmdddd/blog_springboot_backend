@@ -16,9 +16,9 @@
 
 
 IMPORTANT:
-- Deleting an article should delete comments
 - Bug
-- Pagination
+- Pagination for artciles
+- Use INC instead of set for CommentCountUpdateService (MongoTemplate)
 
 Ideas:
 Pagination to blogs, articles and comments
