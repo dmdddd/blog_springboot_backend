@@ -228,8 +228,8 @@ public class ArticleService {
         }
 
         article.setUpdatedAt(new Date()); 
-
         articleRepository.save(article);
+        
         blogService.updateBlogUpdatedAt(blog);
 
         logger.info("Successfully updated article [blog={}, article={}]", blog, article);
