@@ -24,7 +24,7 @@ public class ArticleCommentAggregationFailsafeService {
 
     private final MongoTemplate mongoTemplate;
 
-    private static final int BATCH_SIZE = 5;
+    private static final int BATCH_SIZE = 100;
 
     @Autowired
     public ArticleCommentAggregationFailsafeService(MongoTemplate mongoTemplate) {
