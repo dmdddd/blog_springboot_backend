@@ -74,7 +74,7 @@ For detailed explanations of important design decisions, such as handling of `up
 For detailed documentation, see [API Details](./docs/API_DETAILS.md).
 
 ### Blogs
-- `POST /api/blogs` - Create a new blog (Admin only)
+- `POST /api/blogs` - Create a new blog (logged users only)
 - `GET /api/blogs` - Get all blogs with optional pagination and sorting.
   Example:  
   ```bash
