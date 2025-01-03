@@ -17,8 +17,8 @@ public class ArticleResponseDto {
     private String content;
     private int upvotes = 0;
     private List<String> upvoteIds = new ArrayList<>();
-    private final boolean canUpvote; // DTO only field
-    private int commentCount;
+    private final boolean canUpvote;
+    private int commentCount = 0;
     private String author;
     private Date createdAt;
     private Date updatedAt;

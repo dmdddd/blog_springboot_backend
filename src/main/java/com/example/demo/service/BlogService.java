@@ -10,6 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -35,13 +39,16 @@ public class BlogService {
     private final BlogConverter blogConverter;
     private final AuthenticationService authenticationService;
     private final PaginationService paginationService;
+    private final MongoTemplate mongoTemplate;
+
 
     // Constructor injection
-    public BlogService(BlogRepository blogRepository, BlogConverter blogConverter, AuthenticationService authenticationService, PaginationService paginationService) {
+    public BlogService(BlogRepository blogRepository, BlogConverter blogConverter, AuthenticationService authenticationService, PaginationService paginationService, MongoTemplate mongoTemplate) {
         this.blogRepository = blogRepository;
         this.blogConverter = blogConverter;
         this.authenticationService = authenticationService;
         this.paginationService = paginationService;
+        this.mongoTemplate = mongoTemplate;
     }
 
     public PaginatedResponseDto<BlogResponseDto> getBlogs(int page, int size, String sortBy, String sortDir, String category, String search) {
@@ -89,7 +96,7 @@ public class BlogService {
 
         String userId = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         BlogUser admin = new BlogUser(userId, authenticationService.getCurrentUserEmail(), authenticationService.getCurrentUserName(), BlogRole.ADMIN, new Date());
-        Blog newBlog = new Blog(null, blogRequest.getName(), blogRequest.getTitle(), blogRequest.getDescription(), new Date(), new Date(), Arrays.asList(admin));
+        Blog newBlog = new Blog(null, blogRequest.getName(), blogRequest.getTitle(), blogRequest.getDescription(), new Date(), new Date(), Arrays.asList(admin), 0);
 
         logger.debug("Saving new blog {}", newBlog);
 
@@ -135,5 +142,22 @@ public class BlogService {
             blog.setUpdatedAt(new Date());  // Update the updatedAt field with current date
             blogRepository.save(blog);      // Save the updated blog
         });
+    }
+
+    /**
+     * Updates the articleCount for a specific blog by a given delta.
+     *
+     * @param blogSlug the slug of the blog
+     * @param delta    the value to increment (positive) or decrement (negative)
+     */
+    public void updateArticleCount(String blogSlug, int delta) {
+        // Define the query to match the blog by its slug
+        Query query = new Query(Criteria.where("name").is(blogSlug));
+
+        // Define the update operation to increment or decrement articleCount by delta
+        Update update = new Update().inc("articleCount", delta);
+
+        // Perform the update operation
+        mongoTemplate.updateFirst(query, update, Blog.class);
     }
 }

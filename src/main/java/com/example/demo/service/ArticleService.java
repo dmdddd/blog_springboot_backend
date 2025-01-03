@@ -152,10 +152,11 @@ public class ArticleService {
         Article newArticle = new Article(null, articleRequest.getName(), articleRequest.getBlog(), articleRequest.getTitle(),
             articleRequest.getContent(), 0, new ArrayList<String>(), 0, user, new Date(), new Date(), admins, editors);
 
-
         logger.debug("Saving new article {}", newArticle);
 
         articleRepository.save(newArticle);
+
+        blogService.updateArticleCount(blog.getName(), 1);
 
         blogService.updateBlogUpdatedAt(blog.getName());
 
@@ -175,6 +176,9 @@ public class ArticleService {
         }
 
         articleRepository.deleteByBlogAndName(blog, articleName);
+
+        blogService.updateArticleCount(blog, -1);
+
         logger.info("Successfully deleted article {}, blog: {}", articleName, blog);
 
         eventPublisher.publishEvent(new ArticleDeletedEvent(blog, articleName));
