@@ -32,7 +32,7 @@ This repository contains the backend API for a **Blog Management Application**. 
 
 ### Prerequisites
 Ensure the following software is installed on your machine:
-- Java JDK 11 or higher - https://www.oracle.com/cis/java/technologies/downloads/#jdk23-windows
+- Java JDK23 or higher - https://www.oracle.com/cis/java/technologies/downloads/#jdk23-windows
 - Gradle
 - MongoDB (local instance or cloud setup like MongoDB Atlas)
 - Firebase service account credentials (download JSON file)
@@ -57,7 +57,7 @@ Ensure the following software is installed on your machine:
    ```
 4. **Build and Run the Application**:
    ```bash
-   gradle bootRun
+   .\gradlew bootRun
    ```
 5. **Access the API**:
    The API will be available at `http://localhost:8080`.
@@ -73,9 +73,13 @@ For detailed explanations of important design decisions, such as handling of `up
 ## API Endpoints (Quick Reference)
 For detailed documentation, see [API Details](./docs/API_DETAILS.md).
 
-### Blog Management
+### Blogs
 - `POST /api/blogs` - Create a new blog (Admin only)
-- `GET /api/blogs` - Get all blogs - supports pagination (query query parameters: page, size)
+- `GET /api/blogs` - Get all blogs with optional pagination and sorting.
+  Example:  
+  ```bash
+  curl "https://api.example.com/api/blogs?page=1&size=10&sortBy=name&sortDir=asc"
+  ```
 - `GET /api/blogs/{id}` - Get blog details
 - `GET /api/blogs/checkSlug/{slug}` - Check if blog name is unique (logged users only)
 <!-- - `PUT /api/blogs/{id}` - Update a blog (Admin only) -->
@@ -105,18 +109,73 @@ For detailed documentation, see [API Details](./docs/API_DETAILS.md).
 ---
 
 ## Database Schema
-- **Users Collection**:
-  - `id`: Unique identifier
-  - `email`: User email
-  - `role`: Role (Admin, Editor, User)
+### Blogs Collection Schema
+The `blogs` collection in the database stores information about individual blogs. The schema is structured as follows:
+```javascript
+{
+  _id: ObjectId,          // Unique identifier for the blog (auto-generated)
+  name: String,           // Name of the blog
+  title: String,          // Title of the blog
+  description: String,    // Description of the blog
+  updatedAt: Date,        // The date and time when the blog was last updated
+  users: [Object]         // Array of user objects associated with the blog
+}
+```
 
-- **Blogs Collection**:
-  - `id`: Blog ID
-  - `title`: Blog title
-  - `createdBy`: User ID of the creator
+### Article Collection Schema
+The `article` collection in the database stores all relevant information about blog articles. The schema is structured as follows:
+```javascript
+{
+  _id: ObjectId,       // Unique identifier for the article (auto-generated)
+  name: String,        // Name of the article (slug)
+  blog: String,        // The blog or source to which the article belongs (slug)
+  title: String,       // Title of the article
+  content: String,     // The main content of the article (text or HTML)
+  upvotes: Number,     // Number of upvotes for the article
+  upvoteIds: [String], // Array of user IDs who have upvoted the article
+  author: String,      // The author of the article (could be user ID or name)
+  createdAt: Date,     // The date and time when the article was created
+  admins: [String],  // List of user IDs who are admins for the blog
+  editors: [String]  // List of user IDs who are editors for the blog
+}
+```
 
-- **Articles Collection**:
-  - `id`: Article ID
-  - `blogId`: Associated Blog ID
-  - `content`: Article content
-  - `upvotes`: Number of upvotes
+### Comments Collection Schema
+The `comments` collection in the database stores information about individual comments made on articles. The schema is structured as follows:
+```javascript
+{
+  _id: ObjectId,        // Unique identifier for the comment (auto-generated)
+  text: String,         // The content of the comment
+  blog: String,         // The blog to which the comment belongs
+  articleName: String,  // The name of the article associated with the comment
+  userEmail: String,    // Email address of the user who made the comment
+  createdAt: Date,      // The date and time when the comment was created
+  updatedAt: Date       // The date and time when the comment was last updated
+}
+```
+
+### Pages Collection Schema
+The `pages` collection in the database stores information about custom pages associated with blogs. The schema is structured as follows:
+```javascript
+{
+  _id: ObjectId,       // Unique identifier for the page (auto-generated)
+  blog: String,        // The blog to which the page belongs
+  slug: String,        // A URL-friendly identifier for the page
+  title: String,       // Title of the page
+  content: String,     // The main content of the page
+  order: Number,       // Display order of the page in navigation
+  createdAt: Date,     // The date and time when the page was created
+  updatedAt: Date      // The date and time when the page was last updated
+}
+```
+
+### Article Comment Change Collection Schema
+The `article_comment_change` collection in the database stores information about the net changes in the comments for each article. The schema is structured as follows:
+```javascript
+{
+  _id: ObjectId,         // Unique identifier for the comment change record (auto-generated)
+  blogSlug: String,      // Slug of the blog to which the article belongs
+  articleSlug: String,   // Slug of the article that the comment change relates to
+  netChange: Number      // Net change in the number of comments (positive for new comments, negative for deleted comments)
+}
+```
