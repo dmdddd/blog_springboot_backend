@@ -20,30 +20,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // Blogs
-                .requestMatchers(HttpMethod.POST, "/api/blogs").authenticated()
-                .requestMatchers("/api/blogs/checkSlug/*").authenticated()
 
-                // Articles
-                .requestMatchers(HttpMethod.POST, "/api/blogs/*/articles").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/blogs/*/articles/*").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/blogs/*/articles/*").authenticated()
-                .requestMatchers("/api/blogs/*/articles/checkSlug/*").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/blogs/*/articles/*/vote").authenticated()
+                // Public endpoints (no authentication required)
+                .requestMatchers(HttpMethod.GET, "/api/blogs").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/blogs/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/blogs/*/articles").permitAll()
 
-                // Pages
-                .requestMatchers(HttpMethod.PUT, "/api/blogs/*/pages/*").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/blogs/*/pages/*").authenticated()
+                // All other endpoints require authentication
+                .anyRequest().authenticated())
 
-                // Comments
-                .requestMatchers(HttpMethod.POST, "/api/blogs/*/articles/*/comments").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/comments/*").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/comments/*").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/comments/updateIcon").authenticated()
-
-                // Fallback for any other requests
-                .anyRequest().permitAll())
-                            
             .addFilterBefore(firebaseTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
