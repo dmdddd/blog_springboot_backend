@@ -41,6 +41,9 @@ public class Blog {
     @Field("users")
     private List<BlogUser> users = new ArrayList<>();
 
+    @Field("articleCount")
+    private int articleCount = 0;
+
     @Override
     public String toString() {
         // Truncate description to 50 characters to avoid long output

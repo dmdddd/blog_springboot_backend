@@ -16,4 +16,5 @@ public class BlogResponseDto {
     private Date updatedAt;
     private boolean isAdmin;
     private boolean isEditor;
+    private int articleCount = 0;
 }

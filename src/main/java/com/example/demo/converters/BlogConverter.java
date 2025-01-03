@@ -37,7 +37,7 @@ public class BlogConverter {
         boolean isEditor = blog.getUsers().stream()
             .anyMatch(user -> user.getUid().equals(userId) && user.getRole() == BlogRole.EDITOR);
 
-        return new BlogResponseDto(blog.getId(), blog.getName(), blog.getTitle(), blog.getDescription(), blog.getCreatedAt(), blog.getUpdatedAt(), isAdmin, isEditor);
+        return new BlogResponseDto(blog.getId(), blog.getName(), blog.getTitle(), blog.getDescription(), blog.getCreatedAt(), blog.getUpdatedAt(), isAdmin, isEditor, blog.getArticleCount());
     }
 
     /**
