@@ -58,7 +58,7 @@ Immediate updates are chosen for simplicity, consistency, and performance, as th
 
 ---
 
-## Real-Time Updates for `articleCount` in Blogs
+## Real-Time Updates for `articleCount` in Blogs with a failsafe
 
 ### Reasoning
 - **Low Write Frequency**: Blogs generally have fewer articles compared to the number of comments an article might receive. This makes real-time updates efficient and manageable.
@@ -69,6 +69,17 @@ Immediate updates are chosen for simplicity, consistency, and performance, as th
 ### Implementation Highlights
 - Use MongoDB's `$inc` operation for atomic updates.
 - Leverage Spring Boot transactions to bundle operations, ensuring consistency.
+
+### Failsafe: Periodic Aggregation Queries:  
+The system implements a failsafe mechanism to ensure that the article counts for blogs are accurate and consistently updated, even in cases where real-time updates may be delayed or missed. This mechanism uses a batch processing approach to aggregate comment counts across blogs, ensuring that the counts reflect the actual number of articles in the system.
+- **Batch Processing for Data Scanning**  
+  The system uses **batch processing** to scan and update comment counts for articles. This approach is efficient for processing large datasets, as it minimizes the overhead of querying and updating the entire collection at once. Instead, the data is divided into manageable chunks, reducing memory consumption and improving processing time.
+
+- **Bulk Operations in MongoDB**  
+  To optimize performance, **bulk operations** are used for updating the article counts. This approach allows us to execute multiple updates in a single request to MongoDB, significantly reducing the number of database round-trips and improving throughput.
+
+- **Cursor-Based Pagination with `lastProcessedId`**  
+  Instead of relying on `skip`, the system uses **cursor-based pagination** by leveraging the `_id` field of documents. This method ensures consistent and efficient processing for large datasets by avoiding the performance overhead associated with skipping records in large collections. Each batch fetches articles with `_id` greater than the last processed `_id`, making it scalable for growing data sizes.
 
 ---
 
